@@ -1,8 +1,8 @@
 # 个人助理系统——AI Agent 维护的用户专属上下文
 
-> 数据归你，换哪个 AI 都能读懂你；每条经验标明验证过几次，每句话都分得清是你说的还是 AI 猜的。
+> 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
-**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault; AI agents keep it organized by following one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) that any agent can read. Two things set it apart: every lesson the AI distills is graded by how many first-hand experiences support or contradict it, and every sentence about you is marked as either your own words or the AI's inference. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
+**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and is checked against what happened when you tried it. And you just talk: several agents split the upkeep (filing, a daily brief, a monthly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
 ![展示页](docs/images/showcase.png)
 
@@ -10,42 +10,71 @@
 
 ## 解决什么问题
 
-1. **经历散在各处**：日记、聊天、项目文档各在一个地方，回头想找「上次遇到这种事我是怎么处理的」找不到。
-2. **每换一个 AI 都要从头介绍自己**：AI 产品自带的记忆属于平台，看不到、带不走，换一个就清零。
-3. **AI 容易把猜测说成事实**：它会从一两条记录里编出一个完整的「你」，下次再把这个猜测当成你说过的话。
+1. **每换一个 AI 都要从头介绍自己**：AI 产品自带的记忆属于平台，看不到、带不走，换一个就清零。
+2. **经历过的事用不上**：日记、聊天、项目文档散在各处，回头想找「上次遇到这种事我是怎么处理的」找不到；书上的方法写给所有人，不一定适合你。
+3. **整理太累，坚持不下去**：自己归类、打标签、写总结，几周就放弃；让 AI 每次先问「要不要存」，问多了也烦。
+
+## 三个特点
+
+### 一、上下文归你：换哪个 AI 都能读懂你
+
+上下文全是你库里的 Markdown 文件。规则写在 `CLAUDE.md`（`AGENTS.md` 是同一份，Claude、Codex 等都读）；关于你的要点汇总在一页 `C-侧写.md`：画像每月重写，近况每天重写，每条带出处。任何 AI 打开库，先读这两份，再按标签只调需要的几篇原记录。
+
+这个做法来自作者早期的「接力文档」：每和 AI 干完一段活，就让它写一份交接文档，写清做到哪了、排除过什么、踩过什么坑、我习惯怎么做，下一个 AI 读完接着干。后来这些交接文档合成了一份规则和一页侧写。
+
+### 二、经历长成自己的应对手册：记录 → 情境 → 策略
+
+难受了、卡住了、想通了，随手记一条：发生了什么，当时怎么想，事后一句感悟。AI 把记录归进你定的几个情境；同一种模式出现几次，就提炼成一条策略：识别信号、机制、破解步骤，加上证据和反例的链接。
+
+- 识别信号直接引用你当时的原话，每条结论都能点回原记录。
+- 之后照着做了，有用算支持，更糟算反例；反例不少于支持时，策略转为存疑，不删，等你决定。
+- 书和 AI 给的建议只记作来源，不算数。
+- AI 对你的推测，比如「为什么会这样」，单独标「（AI 判断）」，可以推翻。
+
+### 三、你只管说：整理交给 AI Agent
+
+想到什么就说一句，或往 `0-Inbox/` 丢一行字。放到哪、怎么写，由 AI 按规则判断，做完再报告；真拿不准的，写成选择题放进 `0-Unclear/` 等你勾。作者的用法是几个 Agent 分工：日常入库随时归位；每天 08:00 的晨报给当天的提醒，并重写侧写的近况；每月 1 日的巡检把新记录归进策略、重写画像；规则只有一个 Agent 能改。你只做三件事：说话、勾选择题、定规则。
+
+多个 Agent 同时运行、定时触发是平台提供的；这个项目设计的是规则和分工，见 [人和 AI 怎么分工](docs/人和AI怎么分工.md)。
 
 ## 怎么做的
 
 | | 做法 | 对应规则 |
 |---|---|---|
-| 数据归你 | 全部是你电脑里的 Markdown 文件。规则写在库根目录的 `CLAUDE.md`，`AGENTS.md` 是同一份，Claude、Codex 等都读它 | 第二节 |
-| 三层结构 | **A 执行**（项目、旅行，有状态、会结束）· **B 记录**（情绪、想法、对话、学习，原话一字不改）· **C 蒸馏**（AI 从记录里提炼的经验、综述、回忆录，随时可重跑） | 第二节、铁律 1 |
-| 经验分档 | 每条应对策略开头一行：⚪ 待验证 / 🟡 部分验证 / 🟢 已验证 / 🔴 存疑，只数你亲身经历过的次数，分支持和反例 | 6.10 |
-| 原话和猜测分开 | 你的原话放「」里并链接到原记录；AI 对你的推测在句末标「（AI 判断）」 | 4.1 |
-| 用户侧写 | `C-侧写.md`：任何 AI 先读这一页，就知道你是谁、在忙什么、要注意什么。画像每月重写，近况每天重写，每条带出处 | 6.11 |
-| 多个 Agent 分工 | 入库、规则与巡检、每日晨报、移动改名各有负责人；平台负责调度，这里设计的是规则和分工 | [人和 AI 怎么分工](docs/人和AI怎么分工.md) |
+| 一份规则 | 规则写在库根目录的 `CLAUDE.md`，`AGENTS.md` 是原样副本，任何 AI 读同一份 | 第二节 |
+| 三层结构 | **A 执行**（项目、旅行，有状态、会结束）· **B 记录**（情绪、想法、对话、学习，原话一字不改）· **C 蒸馏**（AI 从记录里提炼的情境、策略、综述、回忆录和侧写，随时可重跑） | 第二节、铁律 1 |
+| 用户侧写 | `C-侧写.md`：画像每月重写，近况每天重写，每条带出处；只当索引，引用事实回原记录 | 6.11 |
+| 提炼策略 | 只在你要求或巡检时做；每条策略必须带证据和反例的链接 | 3.3 |
+| 证据次数 | 策略开头一行：⚪ 待验证 / 🟡 部分验证 / 🟢 已验证 / 🔴 存疑，只数你亲身经历的次数，分支持和反例 | 6.10 |
+| 原话和推测分开 | 原话放「」并链回原记录；AI 对你的推测在句末标「（AI 判断）」 | 4.1 |
+| 入库 | AI 自己判断放哪，原话不改；拿不准的放 `0-Unclear/`，写成选择题 | 3.1、铁律 3 |
+| 巡检 | 每月 1 日处理新记录、重算证据、重写画像，在项目日志里留一条记录 | 第八节 |
 | 看板 | 单个 HTML，浏览器直接读库，只列事实，并按规则做 11 项体检 | [cockpit-web](cockpit-web/README.md) |
 
-一条经验长这样（来自虚构的示例库，`demo-vault/C-Playbook/C-Strategies/组会前先写三句话结论.md`，有删节）：
+一条策略长这样（来自虚构的示例库，`demo-vault/C-Playbook/C-Strategies/把论文拆到 25 分钟能开工的大小.md`，有删节）：
 
 ```markdown
-> 🟡 部分验证 · 验证 3 次（支持 3 / 反例 0）· 更新 2026-10-01 · 缺第 2 步
+> 🟢 已验证 · 验证 3 次（支持 3 / 反例 0）· 更新 2026-10-01
+
+## Principle
+开不了工时，问题多半出在任务太大、看不见第一步。先把它拆到“25 分钟内能开始、能做完一小块”的大小，再开工。
+
+## 识别信号
+- 「可能是“写综述”这个任务太大了，我根本不知道第一步是什么。」（[[对着空白的文献综述坐了一下午]] 2026-07-08）
 
 ## 机制
 （本节为 AI 判断，依据见证据栏）
-- 紧张的对象是“说不清楚”，改 PPT 是在做一件看起来相关、其实不解决问题的事。
+- 大任务没有清楚的第一步，开工前得先做一次“从哪开始”的决定，这个决定本身就累，于是被一再推后。
 
 ## 关联链接
-**证据**（第 1 步）：
-- [[组会前一晚改 PPT 改到一点]]（2026-07-22）—— 第一次照师姐的建议写三句话，写完不慌了，组会顺利
-- [[三句话写出来以后 PPT 只是配图]]（2026-08-26）—— 第二次照做，被问到缺失值也接得住
-- [[组会被周老师追问基线模型]]（2026-09-16）—— 被连续追问时，靠提前写好的三句话接回了汇报
-**证据**（第 2 步）：暂无
+**证据**：
+- [[对着空白的文献综述坐了一下午]]（2026-07-08）—— “写综述”太大、没有第一步，一下午没开工，模式出现、机制解释得通
+- [[数据清洗拆成小块两天就做完了]]（2026-08-18）—— 数据清洗拆成六块、每块 25 分钟，挂了三周的事两天做完
+- [[开工的门槛是任务大小不是意志力]]（2026-09-08）—— 第三章从一小段写起，25 分钟后停不下来
+**来源**：《原子习惯》中的两分钟法则；番茄工作法以 25 分钟为一段的做法
 ```
 
-第 1 步亲身验证过 3 次，第 2 步一次都没有，所以整条最高只能到「部分验证」。看板会把每条经验的等级列出来：
-
-![策略证据等级](docs/images/strategy-grades.png)
+三条证据都是林舟自己的记录，归在「启动-执行」这个情境下；书里的说法只记作来源。示例库里另外三条策略分别演示：有一步还没试过、照着做反而更糟（反例）、只有 AI 的建议还没亲身试过。
 
 ## 五分钟试一下
 
@@ -54,8 +83,8 @@
 
    ![驾驶舱：示例库](docs/images/cockpit-demo.png)
 
-3. 用 Obsidian 打开 `demo-vault/`，翻翻 `C-Playbook/C-Strategies/` 里四条不同等级的经验，和根目录的 `C-侧写.md`。
-4. 让你的 AI（Claude Code、Codex，或 Obsidian 里的 AI 插件）在 `demo-vault/` 里工作，说「整理收件箱」或「我最近在忙什么」，看它怎么按规则做。
+3. 用 Obsidian 打开 `demo-vault/`，从 `C-Playbook/C-Strategies/` 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 `C-侧写.md`。
+4. 让你的 AI（Claude Code、Codex，或 Obsidian 里的 AI 插件）在 `demo-vault/` 里工作，说「整理收件箱」（收件箱里留了三句话，可以和展示页特点三的例子对照），或问「我最近在忙什么」，看它怎么按规则做。
 
 ## 用在自己的库上
 
@@ -67,7 +96,7 @@
 
 ## 作者自己的库
 
-这套规则来自作者自己用了三个多月的真实库（不公开）：约 250 篇笔记，13 条经验（8 条已验证、5 条部分验证），引入 AI 后改过 4 次大版本。每一版是怎么被真实问题逼出来的，见 [版本演进](docs/版本演进.md)；每条原则为什么这么定，见 [设计原则](docs/设计原则.md)。
+这套规则来自作者自己用了三个多月的真实库（不公开）：约 250 篇笔记，从中长出 13 条应对策略，引入 AI 后改过 4 次大版本。每一版是怎么被真实问题逼出来的，见 [版本演进](docs/版本演进.md)；每条原则为什么这么定，见 [设计原则](docs/设计原则.md)。
 
 ## 隐私
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>个人助理系统</title>
-<meta name="description" content="AI Agent 维护的用户专属上下文：数据归你，换哪个 AI 都能读懂你；每条经验标明验证过几次，每句话都分得清是你说的还是 AI 猜的。">
+<meta name="description" content="AI Agent 维护的用户专属上下文：数据归你，换哪个 AI 都能读懂你；经历过的事长成你自己的应对手册；你只管说，整理交给 AI Agent。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap">
@@ -53,7 +53,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 h1,h2,h3{text-wrap:balance;margin:0}
 p{margin:0}
 .wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.mono{font-family:var(--f-mono);font-size:var(--s-1);letter-spacing:0}
 .eyebrow{font-size:var(--s-1);color:var(--muted);letter-spacing:.08em;font-weight:500}
 
 /* 顶栏 */
@@ -80,6 +79,7 @@ p{margin:0}
 .claims .k{font-weight:700;font-size:var(--s1);line-height:1.5}
 .claims .k small{display:block;font-weight:400;font-size:var(--s-1);color:var(--muted)}
 .claims .ex{min-width:0;font-family:var(--f-mono);font-size:var(--s-1);line-height:1.7;color:var(--ink);overflow-wrap:anywhere}
+.claims .ex .to-arrow{color:var(--accent);padding-inline:4px}
 .claims .go{color:var(--muted);font-size:var(--s-1);white-space:nowrap}
 .claims a:hover .go{color:var(--accent)}
 .hero .note{font-size:var(--s-1);color:var(--muted)}
@@ -88,6 +88,8 @@ p{margin:0}
 .v-q{color:var(--accent);background:var(--accent-wash);border-bottom:2px solid var(--accent);padding:0 2px;border-radius:2px}
 .v-ai{background:repeating-linear-gradient(135deg,var(--ai-wash) 0 3px,transparent 3px 7px);border-bottom:1.5px dashed var(--ai);padding:0 2px}
 .v-ai .tag{color:var(--ai);font-weight:500}
+.key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:var(--s-1);color:var(--muted)}
+.key > span > span{margin-right:4px}
 
 /* 特点区块 */
 .feature{padding-block:64px}
@@ -95,6 +97,7 @@ p{margin:0}
 .feature .wrap{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start}
 .claim{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px)}
 .claim h2{font-family:var(--f-display);font-weight:900;font-size:var(--s3);line-height:1.3}
+.nb{display:inline-block}
 .claim p{color:var(--muted);max-width:32em}
 .claim p strong{color:var(--ink);font-weight:500}
 .claim .why{border-left:3px solid var(--rule);padding-left:14px;font-size:var(--s-1);color:var(--muted)}
@@ -105,6 +108,7 @@ p{margin:0}
 .file{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
 .file .path{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding:9px 16px;border-bottom:1px solid var(--rule);background:var(--paper);overflow-x:auto;white-space:nowrap}
 .file .body{padding:18px 20px;display:grid;gap:14px}
+.file .foot{font-size:var(--s-1);color:var(--muted);padding:12px 20px;border-top:1px dashed var(--rule)}
 .src{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
 
 /* 特点一：阅读顺序 + 侧写 */
@@ -124,60 +128,87 @@ p{margin:0}
 .lines li::before{content:"";position:absolute;left:0;top:.75em;width:5px;height:5px;border-radius:50%;background:var(--muted)}
 .lines .src{margin-left:6px;white-space:normal;overflow-wrap:anywhere}
 .subh{font-size:var(--s-1);color:var(--muted);font-weight:500;letter-spacing:.04em}
-.file .foot{font-size:var(--s-1);color:var(--muted);padding:12px 20px;border-top:1px dashed var(--rule)}
 
-/* 特点二：证据分级 */
-.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.legend div{border-radius:10px;padding:10px 12px;font-size:var(--s-1);line-height:1.5;display:grid;gap:2px}
-.legend b{font-weight:700;font-size:var(--s0)}
+/* 特点二：记录 → 情境 → 策略 */
 .g-good{--g:var(--good);--gw:var(--good-wash)}
 .g-warn{--g:var(--warn);--gw:var(--warn-wash)}
 .g-crit{--g:var(--crit);--gw:var(--crit-wash)}
 .g-idle{--g:var(--idle);--gw:var(--idle-wash)}
-.legend div{background:var(--gw);color:var(--ink)}
-.legend b{color:var(--g)}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--g);flex:none}
 .g-idle .dot{background:transparent;border:2px solid var(--g)}
 
-.tabs{display:grid;gap:6px}
-.tab{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.tab{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}
 .tab:hover{border-color:var(--g)}
 .tab[aria-selected="true"]{border-color:var(--g);box-shadow:inset 4px 0 0 var(--g);background:var(--gw)}
-.tab .t{font-weight:500;line-height:1.5}
-.tab .lv{font-size:12px;color:var(--g);font-weight:700;margin-right:6px}
-.tally{display:inline-flex;gap:3px;align-items:center}
-.pip{width:9px;height:14px;border-radius:2px;background:var(--good)}
-.pip.con{background:var(--crit)}
-.pip.none{background:transparent;border:1px dashed var(--muted)}
+.tab .t{font-weight:500;line-height:1.45;font-size:var(--s-1)}
+.tab .t small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
 
-.panel .gl{font-family:var(--f-mono);font-size:var(--s-1);background:var(--code);border-left:3px solid var(--g);padding:10px 14px;border-radius:0 8px 8px 0;overflow-x:auto;white-space:nowrap}
-.panel .pr{font-size:var(--s1);line-height:1.7}
-.ev{display:grid;gap:10px}
-.ev h4{margin:0;font-size:var(--s-1);color:var(--muted);font-weight:500;letter-spacing:.04em}
-.ev ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.ev li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:start}
-.ev li .m{margin-top:5px}
-.ev li .d{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.ev li .n{font-weight:500}
-.ev li .x{grid-column:2;color:var(--muted);font-size:var(--s-1);line-height:1.6}
-.ev .empty{color:var(--muted);font-size:var(--s-1);border:1px dashed var(--rule);border-radius:8px;padding:8px 12px}
-.verdict{background:var(--gw);border-radius:10px;padding:12px 14px;font-size:var(--s-1);line-height:1.7}
+.chain{padding:18px 20px;display:grid;gap:8px}
+.stage-h{margin:0;display:flex;align-items:center;gap:8px;font-size:var(--s-1);color:var(--muted);font-weight:500;letter-spacing:.04em}
+.stage-h .n{font-family:var(--f-mono);font-size:11px;width:20px;height:20px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);display:inline-grid;place-items:center;flex:none;letter-spacing:0}
+.stage{display:grid;gap:10px}
+.recs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,168px),1fr));gap:8px}
+.rec{background:var(--paper);border:1px solid var(--rule);border-top:3px solid var(--r);border-radius:8px;padding:10px 12px;display:grid;gap:6px;align-content:start;font-size:var(--s-1);line-height:1.6}
+.rec .rh{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.rec .ty{font-size:11px;border:1px solid var(--rule);background:var(--sheet);border-radius:4px;padding:0 5px;color:var(--muted)}
+.rec .d{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.rec .rt{font-weight:500}
+.rec .role{font-size:12px;font-weight:700;color:var(--r)}
+.r-seen{--r:var(--idle)} .r-ok{--r:var(--good)} .r-bad{--r:var(--crit)} .r-part{--r:var(--warn)} .r-same{--r:var(--idle)} .r-src{--r:var(--ai)}
+.r-same,.r-src{border-top-style:dashed}
+.down{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding-left:4px}
+.down::before{content:"↓";color:var(--accent);font-family:var(--f-mono);font-size:14px;width:20px;text-align:center}
+.sit{background:var(--accent-wash);border-radius:8px;padding:10px 14px;font-size:var(--s-1);line-height:1.65}
+.sit b{color:var(--accent);margin-right:6px}
+.strat{border:1px solid var(--rule);border-left:4px solid var(--g);border-radius:8px;padding:12px 16px;display:grid;gap:10px}
+.strat .sn{font-weight:700;font-size:var(--s1);line-height:1.5}
+.strat .gl{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow-x:auto;white-space:nowrap}
+.strat .pr{line-height:1.7}
+.row{display:grid;grid-template-columns:4.6em minmax(0,1fr);gap:10px;font-size:var(--s-1);line-height:1.7}
+.row > b{color:var(--muted);font-weight:500}
+.fix{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.st{display:inline-block;font-size:11px;line-height:1.6;border-radius:4px;padding:0 6px;margin-left:6px;white-space:nowrap;font-weight:500}
+.st.ok{background:var(--good-wash);color:var(--good)}
+.st.no{border:1px dashed var(--warn);color:var(--warn)}
+.status{font-size:var(--s-1);color:var(--g);font-weight:500}
+.verdict{background:var(--gw);border-top:1px solid var(--rule);padding:12px 20px;font-size:var(--s-1);line-height:1.75}
 .verdict b{color:var(--g)}
 
-/* 特点三：原话与 AI 判断 */
-.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--code);border:1px solid var(--rule);border-radius:999px;padding:4px}
-.seg button{appearance:none;font:inherit;font-size:var(--s-1);color:var(--muted);background:transparent;border:0;border-radius:999px;padding:5px 14px;cursor:pointer}
-.seg button[aria-checked="true"]{background:var(--sheet);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.voice .lines li{transition:opacity .2s}
-.voice .v-f,.voice .v-q,.voice .v-ai{transition:opacity .2s}
-.voice[data-mode="q"] .v-f,.voice[data-mode="q"] .v-ai{opacity:.28}
-.voice[data-mode="ai"] .v-f,.voice[data-mode="ai"] .v-q{opacity:.28}
-.voice[data-mode="q"] .v-q,.voice[data-mode="ai"] .v-ai{opacity:1}
-.count{font-size:var(--s-1);color:var(--muted)}
-.key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:var(--s-1);color:var(--muted)}
-.key span span{margin-right:4px}
-.aside{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:14px 18px;font-size:var(--s-1);line-height:1.75;display:grid;gap:6px}
-.aside b{font-weight:700}
+.trace{border:1px solid var(--rule);border-radius:12px;padding:14px 18px;background:var(--sheet);display:grid;gap:10px;font-size:var(--s-1);line-height:1.7}
+.trace > b{font-size:var(--s0)}
+.trace ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.trace li{display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:12px;align-items:baseline}
+.trace li > span:first-child{white-space:nowrap}
+
+/* 特点三：你只管说 */
+.routes{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.routes li{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1.3fr);gap:10px;align-items:start}
+.said{background:var(--accent-wash);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:6px 10px;line-height:1.6}
+.arr{color:var(--accent);text-align:center;padding-top:6px;font-family:var(--f-mono)}
+.arr::before{content:"→"}
+.to{display:grid;gap:4px;font-size:var(--s-1);line-height:1.6;padding-top:4px}
+.to .dest{font-family:var(--f-mono);font-size:12px;font-weight:500;overflow-wrap:anywhere}
+.to .w{color:var(--muted)}
+.to code{font-family:var(--f-mono);font-size:12px;background:var(--code);border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
+.to .hint{font-size:12px;color:var(--accent)}
+
+.beat{list-style:none;margin:0;padding:0;background:var(--sheet);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.beat li{display:grid;grid-template-columns:6.4em minmax(0,1fr);gap:14px;padding:12px 18px}
+.beat li + li{border-top:1px solid var(--rule)}
+.beat .when{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:500;padding-top:3px}
+.beat .what{display:grid;gap:2px;font-size:var(--s-1);line-height:1.65;min-width:0}
+.beat .what b{font-size:var(--s0)}
+.beat .what span{color:var(--muted)}
+.beat .log{margin-top:4px;font-size:12px;color:var(--ink);background:var(--code);border-radius:6px;padding:6px 10px}
+.beat-foot{font-size:var(--s-1);color:var(--muted)}
+
+.opts{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:var(--s-1)}
+.opts li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:8px;align-items:start;line-height:1.6}
+.opts .box{width:14px;height:14px;border:1.5px solid var(--muted);border-radius:3px;margin-top:4px}
+.opts .pick .box{border-color:var(--accent);background:var(--accent-wash)}
+.opts .pick b{color:var(--accent)}
+.guess{font-size:var(--s-1);color:var(--muted);line-height:1.7}
 
 /* 怎么做到的 */
 .how{padding-block:64px;border-top:1px solid var(--rule);background:var(--sheet)}
@@ -192,13 +223,13 @@ p{margin:0}
 .layer p{font-size:var(--s-1);color:var(--muted);line-height:1.7}
 .layer .dirs{font-family:var(--f-mono);font-size:12px;color:var(--ink);line-height:1.8;overflow-wrap:anywhere}
 .layer .test{font-size:var(--s-1);border-top:1px dashed var(--rule);padding-top:8px}
-.flow{font-size:var(--s-1);color:var(--muted);text-align:center}
 .split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .split > div{border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:grid;gap:8px;align-content:start}
 .split h3{font-size:var(--s0);font-weight:700}
 .split ul{margin:0;padding-left:1.2em;font-size:var(--s-1);color:var(--muted);line-height:1.8}
 .split .mine{border-color:var(--accent)}
 .split .mine h3{color:var(--accent)}
+.split .count{font-size:var(--s-1);color:var(--muted)}
 
 /* 试一下 */
 .try{padding-block:56px 40px}
@@ -228,10 +259,17 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
   .steps li:last-child{border-radius:0 0 12px 12px}
   .steps li::before{grid-row:span 2;line-height:1.9}
   .steps b,.steps span{grid-column:2}
-  .legend{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tabs{grid-template-columns:minmax(0,1fr)}
+  .routes li{grid-template-columns:minmax(0,1fr);gap:4px}
+  .arr{text-align:left;padding:0 0 0 4px}
+  .arr::before{content:"↓"}
+  .to{padding-top:0}
+  .trace li{grid-template-columns:minmax(0,1fr);gap:0}
+  .beat li{grid-template-columns:minmax(0,1fr);gap:2px}
   .feature{padding-block:44px}
   .hero{padding-block:28px 40px}
-  .file .body{padding:16px}
+  .file .body,.chain{padding:16px}
+  .verdict{padding:12px 16px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -251,7 +289,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       <p class="eyebrow">开源项目 · 用 Obsidian 和 Markdown 搭建</p>
       <h1>个人助理系统</h1>
       <p class="sub">AI Agent 维护的用户专属<em>上下文</em></p>
-      <p class="lede">数据归你，换哪个 AI 都能读懂你；每条经验标明验证过几次，每句话都分得清是你说的还是 AI 猜的。</p>
+      <p class="lede">数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。</p>
       <div class="meta">
         <span class="chip">Claude、Codex 读同一份规则</span>
         <span class="chip">全部是你电脑里的文件</span>
@@ -265,14 +303,14 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
         <span class="ex">C-侧写.md · 画像 更新 2026-10-01 · 近况 更新 2026-10-14</span>
         <span class="go">看例子 ↓</span>
       </a></li>
-      <li><a href="#evidence">
-        <span class="k">每条经验标明验证过几次<small>只数亲身经历，分支持和反例</small></span>
-        <span class="ex">&gt; 🟡 部分验证 · 验证 3 次（支持 3 / 反例 0）· 缺第 2 步</span>
+      <li><a href="#playbook">
+        <span class="k">经历长成自己的应对手册<small>记录 → 情境 → 策略</small></span>
+        <span class="ex">3 条记录<span class="to-arrow">→</span>启动-执行<span class="to-arrow">→</span>把论文拆到 25 分钟能开工的大小</span>
         <span class="go">看例子 ↓</span>
       </a></li>
-      <li><a href="#voice">
-        <span class="k">分得清是你说的还是 AI 猜的<small>原话进「」，猜测标出来</small></span>
-        <span class="ex"><span class="v-q">「怕的不是周老师，是自己说不清楚。」</span><br><span class="v-ai">心里往往早有倾向<span class="tag">（AI 判断）</span></span></span>
+      <li><a href="#agents">
+        <span class="k">你只管说，整理交给 AI<small>几个 Agent 分工，按时巡检</small></span>
+        <span class="ex">「今天下雨没跑」<span class="to-arrow">→</span>跑步计划.md · 进展日志 2026-10-14</span>
         <span class="go">看例子 ↓</span>
       </a></li>
     </ul>
@@ -284,9 +322,10 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
   <div class="wrap">
     <div class="claim">
       <p class="eyebrow">特点一 · 上下文归你</p>
-      <h2>换一个 AI，读一页就能接上</h2>
+      <h2><span class="nb">换一个 AI，</span><span class="nb">读一页就能接上</span></h2>
       <p>AI 产品自带的记忆属于平台，看不到，也带不走。这里的上下文全是你库里的 Markdown 文件：规则写在 <strong>CLAUDE.md</strong>（AGENTS.md 是同一份），关于你的要点汇总在一页 <strong>C-侧写.md</strong>。</p>
       <p>Claude、Codex 或 Obsidian 里的 AI 插件，打开库先读这两份，就知道你是谁、在忙什么、要注意什么，再按标签只调这次需要的几篇原记录。</p>
+      <div class="why"><b>来历：接力文档</b>作者最早的做法，是每和 AI 干完一段活，就让它写一份交接文档：做到哪了、排除过什么、踩过什么坑、我习惯怎么做。下一个 AI 读完接着干，不管是在网页、编辑器还是桌面端。后来这些交接文档合成了一份规则和一页侧写。</div>
       <div class="why"><b>侧写是索引，不是证据</b>每条都带出处。别的文件要引用事实，得回到原记录，不能引用侧写。</div>
     </div>
 
@@ -329,76 +368,110 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
         </div>
         <div class="foot">节选。规则限定画像不超过 30 行、近况不超过 15 行，一页读得完。</div>
       </div>
-    </div>
-  </div>
-</section>
 
-<section class="feature" id="evidence">
-  <div class="wrap">
-    <div class="claim">
-      <p class="eyebrow">特点二 · 经验有证据</p>
-      <h2>每条经验都标明验证过几次</h2>
-      <p>AI 会从你的记录里提炼应对经验。每条经验开头写一行等级，后面是验证次数，分<strong>支持</strong>和<strong>反例</strong>。</p>
-      <p><strong>只数你亲身经历并记下来的事。</strong>书上的道理、AI 的分析只记作来源，不算次数；同一件事的几条记录算一次。</p>
-      <div class="why"><b>为什么要分档</b>一次偶然的经历很容易被写成“规律”，然后被反复引用，越用越像真的。标出次数，AI 给建议时就知道哪些能放心引用，哪些还只是猜想。</div>
-    </div>
-
-    <div class="example">
-      <div class="legend">
-        <div class="g-idle"><b>⚪ 待验证</b>还没有亲身经历</div>
-        <div class="g-warn"><b>🟡 部分验证</b>支持 1 到 2 次，或分步的经验有一步没做过</div>
-        <div class="g-good"><b>🟢 已验证</b>支持 3 次以上，反例更少</div>
-        <div class="g-crit"><b>🔴 存疑</b>有反例，且不少于支持</div>
-      </div>
-
-      <div class="tabs" id="s-tabs" role="tablist" aria-label="示例库里的四条经验"></div>
-
-      <div class="file panel" id="s-panel" role="tabpanel"></div>
-    </div>
-  </div>
-</section>
-
-<section class="feature" id="voice">
-  <div class="wrap">
-    <div class="claim">
-      <p class="eyebrow">特点三 · 原话和猜测分开</p>
-      <h2>哪句是你说的，哪句是 AI 猜的</h2>
-      <p>你的原话放进<strong>「」</strong>，并链回当时的记录。AI 对你的推测，比如动机、习惯、没说出口的感受，句末标<strong>（AI 判断）</strong>。拿不准算事实还是推测的，一律按推测标。</p>
-      <div class="why"><b>不分开会怎样</b>AI 的猜测一旦写进文件，下一个 AI 读到，就会把它当成你说过的话。几轮之后，没人说得清最初的依据是什么。</div>
-    </div>
-
-    <div class="example">
-      <div class="seg" role="radiogroup" aria-label="标出哪一类">
-        <button type="button" role="radio" aria-checked="true" data-mode="all" id="vm-all">全部标出</button>
-        <button type="button" role="radio" aria-checked="false" data-mode="q" id="vm-q">只看原话</button>
-        <button type="button" role="radio" aria-checked="false" data-mode="ai" id="vm-ai">只看 AI 判断</button>
-      </div>
-
-      <div class="file voice" id="voice-box" data-mode="all">
-        <div class="path">demo-vault/C-侧写.md · 画像（节选）</div>
-        <div class="body">
-          <ul class="lines">
-            <li><span class="v-f">组会前容易紧张，紧张点在说不清楚：</span><span class="v-q">「怕的不是周老师，是自己说不清楚。」</span><span class="src">[[组会前一晚改 PPT 改到一点]] 2026-07-22</span></li>
-            <li><span class="v-f">拆小以后开工很快：</span><span class="v-q">「开工的门槛是任务大小，不是我意志力差。」</span><span class="src">[[开工的门槛是任务大小不是意志力]] 2026-09-08</span></li>
-            <li><span class="v-f">做选择时会列很长的优缺点清单，真正起作用的只有一两条</span><span class="src">[[能接触真实数据比离学校近更重要]] 2026-09-28</span></li>
-            <li><span class="v-ai">心里往往早有倾向，列清单是在找说服自己的理由<span class="tag">（AI 判断）</span></span><span class="src">[[和 AI 讨论两个实习 offer 怎么选]] 2026-09-25</span></li>
-            <li><span class="v-ai">给建议时先给一个今天就能开工的小步骤，只给大方向容易被搁置<span class="tag">（AI 判断）</span></span><span class="src">[[把论文拆到 25 分钟能开工的大小]]</span></li>
-            <li><span class="v-ai">组会前一天他的紧张度偏高，不适合临时加新任务<span class="tag">（AI 判断）</span></span><span class="src">[[组会前一晚改 PPT 改到一点]] 2026-07-22</span></li>
-          </ul>
-        </div>
-        <div class="foot" id="voice-count">这 6 行里：原话 2 处，AI 判断 3 处，其余是带出处的记录。</div>
-      </div>
-
-      <div class="key">
+      <div class="key" aria-label="标记说明">
         <span><span class="v-q">「…」</span>原话，链回当时的记录</span>
         <span><span class="v-ai">虚线底</span>AI 判断</span>
-        <span>不加标记：AI 转述的事实，后面有出处可查</span>
+        <span>不加标记：带出处的事实</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="playbook">
+  <div class="wrap">
+    <div class="claim">
+      <p class="eyebrow">特点二 · 经历长成手册</p>
+      <h2><span class="nb">你经历过的事，</span><span class="nb">长成自己的应对手册</span></h2>
+      <p>难受了、卡住了、想通了，随手记一条：发生了什么，当时怎么想，事后一句感悟。AI 把记录归进你定的几个<strong>情境</strong>；同一种模式出现几次，就提炼成一条<strong>策略</strong>：什么信号说明它又来了，为什么会这样，下次怎么做。</p>
+      <p>策略里的识别信号直接引用你当时的话。之后照着做了，有用、没用都记回来：有用算支持，更糟算反例。</p>
+      <div class="why"><b>和书上的方法论有什么不同</b>书上的道理写给所有人。这里每条策略都从你自己的记录里长出来，也会被你自己的经历推翻。书和 AI 给的建议只记作来源，不算数。</div>
+    </div>
+
+    <div class="example">
+      <div class="tabs" id="s-tabs" role="tablist" aria-label="示例库里的四条策略"></div>
+      <div class="file panel" id="s-panel" role="tabpanel"></div>
+
+      <div class="trace">
+        <b>每一步都能往回追</b>
+        <ul>
+          <li><span><span class="v-q">「…」</span></span><span>你的原话，一个字不改，点开就是当时那条记录。</span></li>
+          <li><span><span class="v-ai"><span class="tag">（AI 判断）</span></span></span><span>AI 的推测，比如“为什么会这样”，单独标出，可以推翻。</span></li>
+          <li><span>“这条不对”</span><span>你说一句，就按反例记下，策略跟着改等级。</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="agents">
+  <div class="wrap">
+    <div class="claim">
+      <p class="eyebrow">特点三 · 你只管说</p>
+      <h2><span class="nb">你只管说，</span><span class="nb">整理是 AI 的活</span></h2>
+      <p>想到什么就说一句，在手机上也行，或者往收件箱里丢一行字。放到哪、怎么写、什么时候提炼，由几个 AI Agent 按同一份规则分工去做，做完告诉你结果。</p>
+      <p><strong>你只做三件事：说话、勾选择题、定规则。</strong>归类、提炼、维护都不用你动手。</p>
+      <div class="why"><b>为什么不先问一句“要不要存”</b>AI 默认会问。问多了人就烦，最后什么都不记。所以规则写明：AI 自己判断，做完再报告；只有真拿不准的，才出一道选择题。</div>
+    </div>
+
+    <div class="example">
+      <div class="file">
+        <div class="path">demo-vault/0-Inbox/随手记-1014.md · 按规则整理</div>
+        <div class="body">
+          <ol class="routes" aria-label="收件箱里的三句话分别去了哪">
+            <li>
+              <div class="said">周老师组会上说第三章的图要统一配色 周五前改完</div>
+              <span class="arr" aria-hidden="true"></span>
+              <div class="to">
+                <span class="dest">A-Projects/毕业论文.md</span>
+                <span class="w">进展日志 2026-10-14：原句照抄</span>
+                <span class="w">下一步加一条待办：第三章的图统一配色，截止 <code>2026-10-16</code></span>
+                <span class="hint">“周五”换算成了日期</span>
+              </div>
+            </li>
+            <li>
+              <div class="said">今天下雨没跑</div>
+              <span class="arr" aria-hidden="true"></span>
+              <div class="to">
+                <span class="dest">A-Projects/跑步计划.md</span>
+                <span class="w">进展日志 2026-10-14：原句照抄</span>
+              </div>
+            </li>
+            <li>
+              <div class="said">阿凯从家里带了辣酱 分了我一瓶 好香</div>
+              <span class="arr" aria-hidden="true"></span>
+              <div class="to">
+                <span class="dest">A-Projects/日常事务.md</span>
+                <span class="w">进展日志 2026-10-14：原句照抄</span>
+                <span class="hint">宿舍的事都记在这里</span>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <div class="foot">一条输入可以拆到几处，处理完收件箱清空。仓库里这份收件箱特意留着没整理，上面是按规则该有的结果，你可以让自己的 AI 跑一次对照。</div>
       </div>
 
-      <div class="aside">
-        <b>第 4 行为什么算 AI 判断</b>
-        <span>原记录里，林舟只说过一次：<span class="v-q">「其实我心里早就偏 B 了」</span>。把这一次说成“往往”，是 AI 的推断，所以要标出来。</span>
+      <div class="file">
+        <div class="path">demo-vault/0-Unclear/慢一点也没关系指什么.md</div>
+        <div class="body">
+          <div class="said">慢一点其实也没关系。</div>
+          <p class="guess">只有一句话，没说指什么。同一天有一次二区慢跑 6 公里，最可能说的是配速。</p>
+          <ul class="opts">
+            <li class="pick"><span class="box"></span><span><b>A</b>（推荐）追加到 [[跑步计划]] 10 月 11 日的进展日志，作为那次慢跑的感受</span></li>
+            <li><span class="box"></span><span><b>B</b> 存为一条想法，归进 [[自我价值与意义感]]</span></li>
+            <li><span class="box"></span><span><b>C</b> 其他，我自己写</span></li>
+          </ul>
+        </div>
+        <div class="foot">拿不准才问，而且是选择题：勾一下，AI 按勾选去做。</div>
       </div>
+
+      <ol class="beat" aria-label="谁在什么时候做什么">
+        <li><span class="when">随时</span><div class="what"><b>日常入库</b><span>你说的话归到该去的地方，原话不改；拿不准的出选择题。</span></div></li>
+        <li><span class="when">每天 08:00</span><div class="what"><b>晨报</b><span>读库给你当天的提醒，然后重写侧写里的「近况」。</span></div></li>
+        <li><span class="when">每月 1 日</span><div class="what"><b>巡检</b><span>把上个月的新记录归进手册，重算策略的证据，重写「画像」，记一条日志。</span><span class="log">示例库 10 月 1 日：处理 11 个新文件，3 条策略补了证据，1 条转为存疑，画像新增 3 条，生成三季度回忆录。</span></div></li>
+        <li><span class="when">你提的时候</span><div class="what"><b>规则</b><span>只有一个 Agent 能改规则文件，改完同步副本、通知其他 Agent。</span></div></li>
+      </ol>
+      <p class="beat-foot">多个 Agent 同时运行、定时触发，是平台提供的。这个项目设计的是：谁管哪一摊，什么时候做什么，每个文件归谁写。</p>
     </div>
   </div>
 </section>
@@ -426,7 +499,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       </div>
       <div class="layer">
         <div class="lt"><b>C</b><span>蒸馏</span></div>
-        <p>AI 从 B 层提炼出的经验、知识综述、季度回忆录和侧写。每句都指回 B 层的出处。</p>
+        <p>AI 从 B 层提炼出的情境、策略、知识综述、季度回忆录和侧写。每句都指回 B 层的出处。</p>
         <div class="dirs">C-Playbook/ · C-Knowledge/ · C-Memoirs/ · C-侧写.md</div>
         <p class="test">删了可以按规则重跑</p>
       </div>
@@ -438,7 +511,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
         <ul>
           <li>一份所有 AI 都遵守的规则：CLAUDE.md，AGENTS.md 是原样副本</li>
           <li>三层结构和字段取值表</li>
-          <li>经验分档、原话与 AI 判断分开、用户侧写三条规则</li>
+          <li>从记录到情境再到策略的提炼流程，策略带证据和反例</li>
           <li>多个 Agent 各管一摊：日常入库、规则与巡检、每日晨报、移动改名</li>
           <li>看板：一个网页文件，直接读库，按规则做 11 项体检</li>
         </ul>
@@ -464,9 +537,9 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     </div>
     <div>
       <ol>
-        <li>下载仓库，用 Obsidian 打开 <code>demo-vault/</code>，翻翻四条不同等级的经验和根目录的 <code>C-侧写.md</code>。</li>
+        <li>下载仓库，用 Obsidian 打开 <code>demo-vault/</code>。从 <code>C-Playbook/C-Strategies/</code> 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 <code>C-侧写.md</code>。</li>
+        <li>让你的 AI 在 <code>demo-vault/</code> 里工作，说“整理收件箱”，和上面特点三的例子对照；或者问“我最近在忙什么”。</li>
         <li>用 Edge 或 Chrome 打开 <code>cockpit-web/index.html</code>，选 <code>demo-vault/</code> 文件夹，看看看板和体检结果。</li>
-        <li>让你的 AI 在 <code>demo-vault/</code> 里工作，说“我最近在忙什么”或“整理收件箱”，看它怎么按规则做。</li>
         <li>想用在自己的库上，把 <code>rules/CLAUDE.md</code> 和 <code>AGENTS.md</code> 复制到库根目录，改掉里面的取值表。</li>
       </ol>
       <div class="fine">
@@ -486,63 +559,70 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
 
 <script>
 (function(){
+  // 四条策略，每条一种情况。记录的 k：seen 问题出现 / ok 照做有效 / bad 反例 / part 部分有效 / same 不另算 / src 只算来源
   var S = [
-    { g:'warn', lv:'部分验证', t:'组会前先写三句话结论', sup:3, con:0, gap:true,
-      line:'> 🟡 部分验证 · 验证 3 次（支持 3 / 反例 0）· 更新 2026-10-01 · 缺第 2 步',
-      pr:'组会前别先改 PPT，先用三句话写清：做了什么、结果怎样、卡在哪。散会后五分钟，把被问到的问题记下来。',
-      groups:[
-        { h:'证据 · 第 1 步 写三句话结论', kind:'sup', items:[
-          ['2026-07-22','组会前一晚改 PPT 改到一点','第一次照师姐的建议写三句话，写完不慌了，组会顺利'],
-          ['2026-08-26','三句话写出来以后 PPT 只是配图','第二次照做，被问到缺失值也接得住'],
-          ['2026-09-16','组会被周老师追问基线模型','被连续追问时，靠写好的三句话接回了汇报'] ]},
-        { h:'证据 · 第 2 步 会后五分钟复盘', kind:'sup', items:[], empty:'暂无。9 月 16 日那次会后没有复盘，当晚一直在回想被追问的问题。' } ],
-      why:'第 1 步验证了 3 次，按次数够得上「已验证」。但第 2 步一次都没照做过。分步的经验只要有一步是 0 次，整条最高到「部分验证」，等级行末尾注明缺第几步。' },
-    { g:'good', lv:'已验证', t:'把论文拆到 25 分钟能开工的大小', sup:3, con:0,
+    { g:'good', lv:'🟢 已验证', t:'把论文拆到 25 分钟能开工的大小', hint:'三条记录，同一个模式',
       line:'> 🟢 已验证 · 验证 3 次（支持 3 / 反例 0）· 更新 2026-10-01',
+      recs:[
+        {ty:'情绪', d:'2026-07-08', n:'对着空白的文献综述坐了一下午', q:'可能是“写综述”这个任务太大了，我根本不知道第一步是什么。', role:'问题出现', k:'seen'},
+        {ty:'想法', d:'2026-08-18', n:'数据清洗拆成小块两天就做完了', q:'原来不是我不想做，是“数据清洗”这四个字没法下手。', role:'拆小以后，有用', k:'ok'},
+        {ty:'想法', d:'2026-09-08', n:'开工的门槛是任务大小不是意志力', q:'开工的门槛是任务大小，不是我意志力差。', role:'照着做，有用', k:'ok'} ],
+      sit:['启动-执行','知道该做、也想做，却迟迟开不了头的时刻；多出现在论文这类大而开放的任务上。'],
       pr:'开不了工时，问题多半出在任务太大、看不见第一步。先拆到“25 分钟内能开始、能做完一小块”的大小，再开工。',
-      groups:[
-        { h:'证据', kind:'sup', items:[
-          ['2026-07-08','对着空白的文献综述坐了一下午','“写综述”太大、没有第一步，一下午没开工'],
-          ['2026-08-18','数据清洗拆成小块两天就做完了','拆成六块、每块 25 分钟，挂了三周的事两天做完'],
-          ['2026-09-08','开工的门槛是任务大小不是意志力','第三章从一小段写起，25 分钟后停不下来'] ]},
-        { h:'来源（不算次数）', kind:'src', items:[
-          ['','《原子习惯》的两分钟法则',''], ['','番茄工作法 25 分钟一段的做法',''] ]} ],
-      why:'三次亲身经历都支持，没有反例，所以是「已验证」。两本书的说法只记作来源，不算次数。' },
-    { g:'crit', lv:'存疑', t:'室友摩擦先说需求再说事实', sup:1, con:1,
+      sig:'待办里挂着一个名词式的大任务，好几周没动；', sigq:'可能是“写综述”这个任务太大了，我根本不知道第一步是什么。',
+      mech:'大任务没有清楚的第一步，开工前得先决定“从哪开始”，这个决定本身就累，于是一拖再拖',
+      steps:[['把大任务写成动词开头、一句话说得完的小块，每块不超过 25 分钟',''],['只挑第一块，定 25 分钟计时，开工',''],['时间到了想继续就继续；不想就停，写下下一块是什么','']],
+      src:'《原子习惯》的两分钟法则；番茄工作法',
+      why:'7 月那次是问题本身；8 月第一次拆小，挂了三周的数据清洗两天做完，第二天就提炼成这条策略；9 月照着做又成了一次，10 月 1 日巡检时补进证据。' },
+    { g:'warn', lv:'🟡 部分验证', t:'组会前先写三句话结论', hint:'第 2 步还没试过',
+      line:'> 🟡 部分验证 · 验证 3 次（支持 3 / 反例 0）· 更新 2026-10-01 · 缺第 2 步',
+      recs:[
+        {ty:'情绪', d:'2026-07-22', n:'组会前一晚改 PPT 改到一点', q:'怕的不是周老师，是自己说不清楚。', role:'照师姐的建议做，有用', k:'ok'},
+        {ty:'想法', d:'2026-08-26', n:'三句话写出来以后 PPT 只是配图', q:'PPT 其实就是给这三句话配图', role:'照着做，有用', k:'ok'},
+        {ty:'情绪', d:'2026-09-16', n:'组会被周老师追问基线模型', q:'三句话救了现场，但救不了晚上。', role:'第 1 步有用，第 2 步没做', k:'part'} ],
+      sit:['压力','有人要评价、时间又逼近时的紧张，目前主要出现在组会汇报前后。'],
+      pr:'组会前别先改 PPT，先用三句话写清：做了什么、结果怎样、卡在哪。散会后五分钟，把被问到的问题记下来。',
+      sig:'组会前一晚反复改 PPT 的字体和配色，内容没变。', sigq:'',
+      mech:'紧张的对象是“说不清楚”，改 PPT 是在做一件看起来相关、其实不解决问题的事',
+      steps:[['组会前花十分钟，写下做了什么、结果怎样、卡在哪，各一句','照做 3 次'],['散会后五分钟内，把被问到的问题写进下一步，写完就不再想','还没试过']],
+      src:'师姐小钟的建议',
+      why:'第 1 步照着做了三次，都有用。9 月 16 日那句「救不了晚上」，说明第 2 步还没做到。手册把这一步标成“还没试过”，不把整条说成已经管用。' },
+    { g:'crit', lv:'🔴 存疑', t:'室友摩擦先说需求再说事实', hint:'照着做，反而更糟',
       line:'> 🔴 存疑 · 验证 2 次（支持 1 / 反例 1）· 更新 2026-10-01',
+      recs:[
+        {ty:'情绪', d:'2026-08-07', n:'跟阿凯说了想十二点以后安静点', q:'先说我要什么，他就不用猜我是不是在指责他。', role:'照着做，有用', k:'ok'},
+        {ty:'情绪', d:'2026-09-20', n:'先说需求反而让阿凯更不高兴', q:'我明明是照上次那个办法说的，先说需求再说事实，怎么这次就炸了。', role:'照着做，更糟（反例）', k:'bad'},
+        {ty:'想法', d:'2026-09-23', n:'阿凯在意的是被安排不是倒垃圾', q:'原来他在意的是被安排，不是活儿本身。', role:'同一件事的后续，不另算', k:'same'} ],
+      sit:['人际关系','和身边的人（目前主要是室友阿凯）有摩擦、需要开口沟通的时刻。'],
       pr:'和室友有摩擦时，先说自己需要什么，再说发生了什么事实，不先指责。',
-      groups:[
-        { h:'证据', kind:'sup', items:[
-          ['2026-08-07','跟阿凯说了想十二点以后安静点','先说早起跑步要睡够，再说被吵醒，阿凯当晚就戴上了耳机'] ]},
-        { h:'反例', kind:'con', items:[
-          ['2026-09-20','先说需求反而让阿凯更不高兴','照步骤说“我需要宿舍干净一点”，阿凯觉得像在开会，冷战三天'] ]} ],
-      why:'反例不少于支持，所以是「存疑」。9 月 23 日的后续记录和这次冲突是同一件事，合算 1 次。存疑的经验不删，留着等本人决定改写还是归档；侧写里也提醒 AI 别直接推荐它。' },
-    { g:'idle', lv:'待验证', t:'两个选项都不差时给决定设截止日期', sup:0, con:0,
+      sig:'同一件小事已经憋了好几天没说，心里冒出', sigq:'想直接吼一句',
+      mech:'“需求”说的是自己的处境时有用；听起来像在给对方派活时，先说需求反而像讲道理，更让人反感',
+      steps:[['开口前想好一句“我需要……”，说的是自己的处境',''],['再说事实，只说发生了什么，不加“又”“总是”',''],['说完停下，等对方回应','']],
+      src:'读过的沟通类文章，出处没记',
+      status:'存疑：不删，留着等林舟决定改写还是归档。侧写里也提醒 AI 先别推荐它。',
+      why:'8 月照着做有用，9 月照着做反而冷战三天。反例和支持一样多，这条转为存疑。三天后那条想法是同一次冲突的后续，合算一次。' },
+    { g:'idle', lv:'⚪ 待验证', t:'两个选项都不差时给决定设截止日期', hint:'只有 AI 的建议，还没亲身试过',
       line:'> ⚪ 待验证 · 验证 0 次（支持 0 / 反例 0）· 更新 2026-09-26',
+      recs:[
+        {ty:'情绪', d:'2026-09-24', n:'两个 offer 都来了反而更慌', q:'两个都想要的时候，就会两个都怕。', role:'期限是公司给的，不算', k:'same'},
+        {ty:'对话', d:'2026-09-25', n:'和 AI 讨论两个实习 offer 怎么选', q:'其实我心里早就偏 B 了，列那么多条是想找一个能说服自己选 A 的理由。', role:'办法是 AI 提的，只算来源', k:'src'} ],
+      sit:['决策','要在几个选项里挑一个、而且选了不好回头的时刻。'],
       pr:'两个选项都不差、又没有外部期限时，先给决定定一个日子；到期按手上的信息选，不再追加比较。',
-      groups:[
-        { h:'证据', kind:'sup', items:[], empty:'暂无第一手记录。实习那次的期限是公司给的，不是自己设的。' },
-        { h:'来源（不算次数）', kind:'src', items:[
-          ['2026-09-25','和 AI 讨论两个实习 offer 怎么选','AI 在讨论里提的建议'], ['','《决断力》里给决定设期限的说法',''] ]} ],
-      why:'这条来自 AI 的分析和一本书，林舟自己还没试过一次。AI 说的、书上写的都不算验证，所以是 0 次。' }
+      sig:'优缺点清单越列越长，新加的条目已经不改变倾向。', sigq:'',
+      mech:'', mechNote:'机制一栏写的是通用说法；在林舟身上成不成立，还没有记录。',
+      steps:[['发现自己在两个都不差的选项之间来回比较时，写下一个决定日期，一般不超过一周',''],['到期前只补真正缺的信息，不再加新的优缺点',''],['到期当天按当时的信息选，选完写一条记录','']],
+      src:'和 AI 的讨论（2026-09-25）；《决断力》',
+      why:'办法来自和 AI 的讨论和一本书。AI 说的、书上写的只记作来源；实习那次的期限是公司给的，也不算。要等林舟自己试过一次，才有第一条证据。' }
   ];
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-  function pips(s){
-    var h = '', i;
-    for(i=0;i<s.sup;i++) h += '<span class="pip"></span>';
-    for(i=0;i<s.con;i++) h += '<span class="pip con"></span>';
-    if(s.gap || (!s.sup && !s.con)) h += '<span class="pip none"></span>';
-    return '<span class="tally" aria-label="支持 '+s.sup+' 次，反例 '+s.con+' 次'+(s.gap?'，有一步还没验证':'')+'">'+h+'</span>';
-  }
 
   var tabs = document.getElementById('s-tabs');
   var panel = document.getElementById('s-panel');
   tabs.innerHTML = S.map(function(s,i){
     return '<button type="button" class="tab g-'+s.g+'" role="tab" id="s-tab-'+i+'" data-i="'+i+'" aria-controls="s-panel">'
       + '<span class="dot"></span>'
-      + '<span class="t"><span class="lv">'+esc(s.lv)+'</span>'+esc(s.t)+'</span>'
-      + pips(s) + '</button>';
+      + '<span class="t">'+esc(s.t)+'<small>'+esc(s.hint)+'</small></span></button>';
   }).join('');
 
   function render(i){
@@ -553,22 +633,42 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     });
     panel.className = 'file panel g-'+s.g;
     panel.setAttribute('aria-labelledby','s-tab-'+i);
-    var groups = s.groups.map(function(g){
-      var list = g.items.length
-        ? '<ul>'+g.items.map(function(it){
-            var mark = g.kind==='src' ? '<span class="m pip none" style="height:10px;width:10px"></span>'
-                     : '<span class="m pip'+(g.kind==='con'?' con':'')+'"></span>';
-            return '<li>'+mark+'<div><span class="n">'+(g.kind==='src' && !it[0] ? esc(it[1]) : '[['+esc(it[1])+']]')+'</span>'
-              + (it[0] ? ' <span class="d">'+it[0]+'</span>' : '') + '</div>'
-              + (it[2] ? '<span class="x">'+esc(it[2])+'</span>' : '') + '</li>';
-          }).join('')+'</ul>'
-        : '<div class="empty">'+esc(g.empty)+'</div>';
-      return '<div class="ev"><h4>'+esc(g.h)+'</h4>'+list+'</div>';
+
+    var recs = s.recs.map(function(r){
+      return '<li class="rec r-'+r.k+'"><div class="rh"><span class="ty">'+esc(r.ty)+'</span><span class="d">'+r.d+'</span></div>'
+        + '<div class="rt">[['+esc(r.n)+']]</div>'
+        + '<div><span class="v-q">「'+esc(r.q)+'」</span></div>'
+        + '<div class="role">'+esc(r.role)+'</div></li>';
     }).join('');
-    panel.innerHTML = '<div class="path">demo-vault/C-Playbook/C-Strategies/'+esc(s.t)+'.md</div>'
-      + '<div class="body"><div class="gl">'+esc(s.line)+'</div>'
-      + '<p class="pr">'+esc(s.pr)+'</p>' + groups
-      + '<div class="verdict"><b>为什么是「'+esc(s.lv)+'」</b>　'+esc(s.why)+'</div></div>';
+
+    var steps = s.steps.map(function(st){
+      var tag = st[1] ? '<span class="st '+(st[1]==='还没试过'?'no':'ok')+'">'+esc(st[1])+'</span>' : '';
+      return '<li>'+esc(st[0])+tag+'</li>';
+    }).join('');
+
+    var mech = s.mech
+      ? '<div class="row"><b>为什么</b><span><span class="v-ai">'+esc(s.mech)+'<span class="tag">（AI 判断）</span></span></span></div>'
+      : '<div class="row"><b>为什么</b><span>'+esc(s.mechNote)+'</span></div>';
+
+    panel.innerHTML =
+        '<div class="path">demo-vault/C-Playbook/C-Strategies/'+esc(s.t)+'.md 和它引用的记录</div>'
+      + '<div class="chain">'
+      +   '<div class="stage"><p class="stage-h"><span class="n">1</span>林舟的记录 · '+s.recs.length+' 条</p><ul class="recs">'+recs+'</ul></div>'
+      +   '<div class="down">归进情境</div>'
+      +   '<div class="sit"><b>情境 · '+esc(s.sit[0])+'</b>'+esc(s.sit[1])+'</div>'
+      +   '<div class="down">提炼成策略</div>'
+      +   '<div class="strat">'
+      +     '<div class="sn">'+esc(s.t)+'</div>'
+      +     '<div class="gl">'+esc(s.line)+'</div>'
+      +     '<p class="pr">'+esc(s.pr)+'</p>'
+      +     '<div class="row"><b>识别信号</b><span>'+esc(s.sig)+(s.sigq ? '<span class="v-q">「'+esc(s.sigq)+'」</span>' : '')+'</span></div>'
+      +     mech
+      +     '<div class="row"><b>怎么做</b><ol class="fix">'+steps+'</ol></div>'
+      +     '<div class="row"><b>来源</b><span>'+esc(s.src)+'（不算次数）</span></div>'
+      +     (s.status ? '<div class="status">'+esc(s.status)+'</div>' : '')
+      +   '</div>'
+      + '</div>'
+      + '<div class="verdict"><b>这条说明</b>　'+esc(s.why)+'</div>';
   }
 
   tabs.addEventListener('click', function(e){
@@ -584,21 +684,6 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     e.preventDefault(); render(n); tabs.children[n].focus();
   });
   render(0);
-
-  var box = document.getElementById('voice-box');
-  var count = document.getElementById('voice-count');
-  var seg = document.querySelector('.seg');
-  var msg = {
-    all:'这 6 行里：原话 2 处，AI 判断 3 处，其余是带出处的记录。',
-    q:'原话 2 处，都是林舟当时写下的话，一个字没改，后面链着原记录。',
-    ai:'AI 判断 3 处，都在句末标明。下一个 AI 读到，知道这是推测，不会当成林舟说过的话。'
-  };
-  seg.addEventListener('click', function(e){
-    var b = e.target.closest('button'); if(!b) return;
-    Array.prototype.forEach.call(seg.children, function(x){ x.setAttribute('aria-checked', x===b ? 'true' : 'false'); });
-    box.dataset.mode = b.dataset.mode;
-    count.textContent = msg[b.dataset.mode];
-  });
 })();
 </script>
 </body>
