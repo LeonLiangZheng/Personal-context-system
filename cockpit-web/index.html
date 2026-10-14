@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>驾驶舱</title>
+<style>
+/* ---------- tokens（参考色板：dataviz reference palette，light / dark 各自选定） ---------- */
+:root{
+  color-scheme: light;
+  --page:#f9f9f7; --surface:#fcfcfb; --surface-2:#f1f0ec;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834;                       /* 分类色 slot 1 / 2 */
+  --seq0:#ecebe6; --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#5598e7; --seq4:#256abf; --seq5:#0d366b; /* 顺序色：蓝，浅→深 */
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --critical:#d03b3b;  /* 状态色，只表状态 */
+  --wash:rgba(42,120,214,.08); --link:#1c5cab;
+  --shadow:0 1px 2px rgba(0,0,0,.04);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#0d0d0d; --surface:#1a1a19; --surface-2:#242422;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926;
+  --seq0:#262624; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#6da7ec; --seq5:#b7d3f6; /* 暗色：近零沉向表面 */
+  --wash:rgba(57,135,229,.12); --link:#86b6ef;
+  --shadow:none;
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font:14px/1.55 system-ui,-apple-system,"Segoe UI","Microsoft YaHei UI","PingFang SC",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--axis)}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 28px 64px}
+.muted{color:var(--muted)} .small{font-size:12px}
+.wl{color:var(--link)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.92em;background:var(--surface-2);padding:0 4px;border-radius:4px}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.title{font-size:22px;font-weight:650;letter-spacing:.2px}
+.sub{color:var(--ink-2);margin-top:2px}
+.actions{display:flex;align-items:center;gap:8px}
+.status{color:var(--muted);font-size:12px;margin-right:6px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--wash)}
+.btn.primary{background:var(--s1);border-color:transparent;color:#fff;padding:9px 16px}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.banner{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--critical);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+
+/* ---------- layout ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);min-width:0}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:600;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.card h3 .hint{font-weight:400;color:var(--muted);font-size:12px;text-align:right}
+section{margin-top:28px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 12px;flex-wrap:wrap}
+.sec-head h2{margin:0;font-size:16px;font-weight:650}
+.stack{display:flex;flex-direction:column;gap:12px}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px;align-items:start}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+@media (max-width:1080px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- tiles ---------- */
+.tile .label{font-size:12px;color:var(--ink-2)}
+.tile .value{font-size:30px;font-weight:600;line-height:1.2;margin-top:6px}
+.tile .foot{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- status（色点 + 符号 + 文字，从不只靠颜色） ---------- */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.st.crit{--c:var(--critical)} .st.serious{--c:var(--serious)} .st.warn{--c:var(--warn)} .st.good{--c:var(--good)} .st.idle{--c:var(--axis)}
+.chip{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:1px 8px;white-space:nowrap}
+
+/* ---------- deadline ---------- */
+.hero-next{padding:12px 14px;border-radius:10px;background:var(--surface-2);margin-bottom:4px}
+.hero-next .hero-text{font-size:15px;font-weight:500;margin:2px 0 3px;line-height:1.45}
+.dl-group-title{font-size:12px;color:var(--muted);margin:16px 0 2px}
+.dl-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;padding:9px 0;border-top:1px solid var(--grid)}
+.dl-row .st{padding-top:2px}
+.dl-text{line-height:1.45}
+.dl-proj{font-size:12px;color:var(--muted);margin-top:2px}
+.more summary{cursor:pointer;font-size:12px;color:var(--muted);padding:6px 0;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.empty{color:var(--muted);font-size:13px;margin:4px 0}
+
+/* ---------- debt ---------- */
+.debt details,.debt .row{border-top:1px solid var(--grid)}
+.debt > :first-child{border-top:0}
+.debt summary,.debt .row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;list-style:none}
+.debt summary{cursor:pointer}
+.debt summary::-webkit-details-marker{display:none}
+.debt summary:hover .what{color:var(--ink)}
+.debt .n{font-size:22px;font-weight:600;line-height:1}
+.debt .n.zero{color:var(--muted)}
+.debt .what{line-height:1.4;color:var(--ink)} .debt .what small{display:block;color:var(--muted);font-size:12px}
+.debt .chev{color:var(--muted);font-size:12px;transition:transform .15s}
+.debt details[open] .chev{transform:rotate(90deg)}
+.debt ul{margin:0 0 10px 56px;padding:0;list-style:none;font-size:12.5px;color:var(--ink-2)}
+.debt ul li{padding:3px 0;display:flex;justify-content:space-between;gap:12px}
+.debt ul li span:last-child{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- strategy grades / profile ---------- */
+.gr-sum{display:flex;flex-wrap:wrap;gap:6px 14px;margin:-2px 0 6px}
+.gr-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:9px 0;border-top:1px solid var(--grid)}
+.gr-name{line-height:1.45}
+.gr-sub{grid-column:1 / -1;font-size:12px;color:var(--muted);margin-top:-2px;font-variant-numeric:tabular-nums}
+.gr-sub .bad{color:var(--serious)}
+
+/* ---------- projects ---------- */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.proj{display:flex;flex-direction:column;gap:10px}
+.proj.stale{box-shadow:inset 3px 0 0 var(--serious)}
+.proj-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.proj-name{font-weight:600;font-size:15px;line-height:1.35}
+.proj-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.prog{height:4px;border-radius:4px;background:var(--grid);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--s1);border-radius:0 4px 4px 0}
+.prog-l{font-size:11.5px;color:var(--muted);margin-top:-5px}
+.proj-log{font-size:12.5px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.proj-log .d{color:var(--muted);margin-right:6px;font-variant-numeric:tabular-nums}
+.proj-next{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.proj-next li{font-size:12.5px;padding-left:18px;position:relative;line-height:1.45}
+.proj-next li::before{content:"";position:absolute;left:1px;top:5px;width:9px;height:9px;border:1.5px solid var(--axis);border-radius:3px}
+.proj-next li > div{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- segmented filter ---------- */
+.seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
+.seg button{font:inherit;font-size:12px;border:0;background:transparent;color:var(--ink-2);padding:4px 11px;border-radius:7px;cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.10)}
+
+/* ---------- heatmap ---------- */
+.hm-wrap{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.hm{--cell:13px;display:grid;grid-template-columns:18px auto;gap:6px;min-width:0;max-width:100%}
+.hm-scroll{overflow-x:auto;padding-bottom:2px}
+.hm-days{display:grid;grid-template-rows:repeat(7,var(--cell));gap:3px;font-size:10px;line-height:var(--cell);color:var(--muted);margin-top:18px}
+.hm-months{display:grid;grid-auto-flow:column;grid-auto-columns:var(--cell);gap:3px;font-size:10.5px;color:var(--muted);height:15px;margin-bottom:3px}
+.hm-months span{white-space:nowrap;overflow:visible}
+.hm-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,var(--cell));grid-auto-columns:var(--cell);gap:3px}
+.hm-grid i{border-radius:3px;background:var(--seq0)}
+.hm-grid i.b1{background:var(--seq1)} .hm-grid i.b2{background:var(--seq2)} .hm-grid i.b3{background:var(--seq3)} .hm-grid i.b4{background:var(--seq4)} .hm-grid i.b5{background:var(--seq5)}
+.hm-grid i.fut{background:transparent}
+.hm-grid i.today{outline:1.5px solid var(--ink);outline-offset:1px}
+.hm-grid i:not(.fut):hover{outline:1.5px solid var(--ink-2);outline-offset:1px}
+.hm-legend{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-top:10px}
+.hm-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.hm-stats{display:grid;grid-template-columns:repeat(2,auto);gap:14px 28px;align-content:start;padding-top:18px}
+.hm-stats .v{font-size:22px;font-weight:600;line-height:1.2}
+.hm-stats .l{font-size:12px;color:var(--muted)}
+
+/* ---------- horizontal bars ---------- */
+.hbars{display:flex;flex-direction:column;gap:4px}
+.hb-row{display:grid;grid-template-columns:var(--lw,56px) minmax(0,1fr) 30px;align-items:center;gap:8px;font-size:12px;border-radius:6px;padding:2px 4px;margin:0 -4px}
+.hb-row:hover,.hb-row:focus-visible{background:var(--wash);outline:none}
+.hb-label{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb-track{height:18px;position:relative;border-left:1px solid var(--axis)}
+.hb-track i{position:absolute;left:0;top:4px;height:10px;background:var(--s1);border-radius:0 4px 4px 0}
+.hb-val{color:var(--ink-2);font-variant-numeric:tabular-nums;text-align:right}
+
+/* ---------- grouped vertical bars ---------- */
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);margin:-2px 0 12px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.vc{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:6px}
+.vc-y{position:relative;height:150px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.vc-y span{position:absolute;right:0;transform:translateY(50%)}
+.vc-plot{position:relative;height:150px;border-bottom:1px solid var(--axis)}
+.vc-plot .gl{position:absolute;left:0;right:0;border-top:1px solid var(--grid)}
+.vc-groups{position:absolute;inset:0;display:flex;align-items:flex-end;gap:4px}
+.vc-g{flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px;border-radius:6px 6px 0 0;cursor:default}
+.vc-g:hover,.vc-g:focus-visible{background:var(--wash);outline:none}
+.vc-g i{width:min(14px,38%);border-radius:4px 4px 0 0;background:var(--s1)}
+.vc-g i.b{background:var(--s2)}
+.vc-x{grid-column:2;display:flex;gap:4px;font-size:10.5px;color:var(--muted);margin-top:5px}
+.vc-x span{flex:1;text-align:center;white-space:nowrap}
+
+/* ---------- table view（每个图都有） ---------- */
+details.tv{margin-top:12px;font-size:12px;color:var(--muted)}
+details.tv summary{cursor:pointer;width:max-content}
+details.tv table{border-collapse:collapse;margin-top:8px;width:100%;font-variant-numeric:tabular-nums}
+details.tv td,details.tv th{text-align:left;padding:4px 8px 4px 0;border-top:1px solid var(--grid);color:var(--ink-2);font-weight:400;vertical-align:top}
+details.tv th{color:var(--muted)}
+
+/* ---------- recent moods ---------- */
+.moods{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+@media (max-width:1080px){.moods{grid-template-columns:minmax(0,1fr)}}
+.moods li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--grid)}
+.moods .d{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;padding-top:1px}
+.moods .t{line-height:1.45}
+.moods .e{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+
+/* ---------- health ---------- */
+.check{border-top:1px solid var(--grid)}
+.check:first-child{border-top:0}
+.check summary{list-style:none;display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;padding:10px 0;align-items:center}
+.check.has summary{cursor:pointer}
+.check summary::-webkit-details-marker{display:none}
+.check .desc small{display:block;color:var(--muted);font-size:12px}
+.check .chev{color:var(--muted);font-size:12px;transition:transform .15s}
+.check[open] .chev{transform:rotate(90deg)}
+.check ul{margin:0 0 12px 104px;padding:0;list-style:none;font-size:12.5px;color:var(--ink-2);columns:2;column-gap:28px}
+.check ul li{break-inside:avoid;padding:2px 0}
+@media (max-width:1080px){.check ul{columns:1;margin-left:0}}
+
+/* ---------- connect ---------- */
+.connect{max-width:560px;margin:9vh auto 0}
+.connect h1{font-size:24px;margin:0 0 10px;font-weight:650}
+.connect p{color:var(--ink-2);margin:0 0 14px}
+.connect ul{color:var(--ink-2);padding-left:18px;margin:0 0 22px}
+.connect .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ---------- tooltip ---------- */
+#tip{position:fixed;z-index:50;left:0;top:0;pointer-events:none;max-width:340px;background:var(--ink);color:var(--page);font-size:12px;line-height:1.55;padding:8px 10px;border-radius:8px;opacity:0;transition:opacity .1s;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+#tip.on{opacity:1}
+#tip b{font-weight:600}
+#tip .m{opacity:.72}
+
+body.busy #main{opacity:.55;transition:opacity .2s}
+footer{margin-top:40px;color:var(--muted);font-size:12px;line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="title" id="title">驾驶舱</div>
+      <div class="sub" id="sub">&nbsp;</div>
+    </div>
+    <div class="actions">
+      <span id="status" class="status"></span>
+      <button id="btn-refresh" class="btn" title="重新读取数据库（切回本页时也会自动刷新）">↻ 刷新</button>
+      <button id="btn-theme" class="btn" title="主题">◐ 自动</button>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <main id="main"></main>
+  <footer>
+    只读 · Markdown 只在这台电脑的浏览器里解析，不上传、不写回。<br>
+    本页只放<strong>机械真相</strong>（有什么、哪些超期、哪些积压）；<strong>今天该干哪件</strong>属于判断，按 CLAUDE.md 不落盘，直接问 AI。
+  </footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+'use strict';
+
+/* ================= 常量（跟随 CLAUDE.md） ================= */
+const META_FILES = ['CLAUDE.md','AGENTS.md','C-Cockpit.md'];   // 规则文件与旧看板本身，不当笔记检查
+const EMO_ZH = {anger:'愤怒',disgust:'厌恶',fear:'恐惧',joy:'喜悦',peace:'平静',poignant:'酸楚',sadness:'悲伤',shame:'羞耻',surprise:'惊讶'};
+const KIND_ZH = {emotion:'❤️ 情绪',insight:'💡 insight',dialogue:'📜 对话',topic:'📚 topic',log:'🟢 项目日志'};
+/* 目录表、根目录文件、类型表和字段取值每次读库时从 CLAUDE.md「二、目录结构」「五、类型速查表」「七、字段取值表」读取（loadRules），
+   改规则不用再改本页。下面是读不到时的默认值；goal、field 是个人词表，没有默认值，读不到就跳过对应检查 */
+const DEFAULT_TOP = ['0-Inbox','0-Unclear','A-Projects','A-Holidays','A-Archive','B-Emotions','B-Insights','B-Topics','B-Dialogues','B-Tools','B-Info','C-Playbook','C-Knowledge','C-Memoirs'];
+const DEFAULT_EMOTIONS = ['anger','disgust','fear','joy','peace','poignant','sadness','shame','surprise'];
+const DEFAULT_STATUS = ['planned','active','done'];
+const DEFAULT_ROOT = ['C-Cockpit.md','使用说明.canvas','CLAUDE.md','AGENTS.md'];
+const DEFAULT_SCHEMA = {
+  project:   {dirs:['A-Projects','A-Archive'], keys:['goal','status','created','updated']},
+  holiday:   {dirs:['A-Holidays','A-Archive'], keys:['status','start','created','updated']},
+  emotion:   {dirs:['B-Emotions'],             keys:['created','situation','emotiontype']},
+  insight:   {dirs:['B-Insights'],             keys:['created','situation']},
+  topic:     {dirs:['B-Topics'],               keys:['created','updated','field']},
+  dialogue:  {dirs:['B-Dialogues'],            keys:['created','updated']},
+  readme:    {dirs:['B-Tools'],                keys:['created','updated']},
+  changelog: {dirs:['B-Tools'],                keys:['created','updated']},
+  info:      {dirs:['B-Info'],                 keys:['created','updated']},
+  strategy:  {dirs:['C-Playbook'],             keys:['created','updated','situation']},
+  situation: {dirs:['C-Playbook'],             keys:['created','updated']},
+  knowledge: {dirs:['C-Knowledge'],            keys:['created','updated','field']},
+  memoir:    {dirs:['C-Memoirs'],              keys:['period','created','updated']},
+  unclear:   {dirs:['0-Unclear'],              keys:['created']},
+  dashboard: {dirs:[''],                       keys:[]},
+  profile:   {dirs:[''],                       keys:['created','updated']},
+};
+let KNOWN_TOP = DEFAULT_TOP, ROOT_FILES = DEFAULT_ROOT, SCHEMA = DEFAULT_SCHEMA,
+    EMOTIONS = DEFAULT_EMOTIONS, STATUS = DEFAULT_STATUS, GOALS = [], FIELDS = [];
+/* 策略证据等级（CLAUDE.md 6.10），按「先看反例、再看支持」的顺序排 */
+const LEVELS = [
+  {name:'存疑',     cls:'crit'},
+  {name:'待验证',   cls:'idle'},
+  {name:'部分验证', cls:'warn'},
+  {name:'已验证',   cls:'good'},
+];
+const EMPTY_OK = ['0-Inbox','0-Unclear','C-Knowledge'];
+const WEEK = ['日','一','二','三','四','五','六'];
+const DAY = 86400000;
+
+const state = {
+  source:null, model:null, vaultName:'', loading:false, lastLoad:0,
+  range: [3,6,12].includes(+localStorage.getItem('cockpit.range')) ? +localStorage.getItem('cockpit.range') : 6,
+};
+const $ = (s, r=document) => r.querySelector(s);
+
+/* ================= 小工具 ================= */
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function today(){ const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function addDays(d, n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+function parseDate(s){ const m = /(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? '')); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }
+function dd(a, b){ return Math.round((new Date(b.getFullYear(),b.getMonth(),b.getDate()) - new Date(a.getFullYear(),a.getMonth(),a.getDate())) / DAY); }
+function p2(n){ return String(n).padStart(2,'0'); }
+function fmtMD(d){ return d ? `${p2(d.getMonth()+1)}-${p2(d.getDate())}` : '—'; }
+function ymd(d){ return `${d.getFullYear()}-${fmtMD(d)}`; }
+function relDay(d){
+  const n = dd(today(), d);
+  if(n === 0) return '今天'; if(n === 1) return '明天'; if(n === -1) return '昨天';
+  return n > 0 ? `${n} 天后` : `${-n} 天前`;
+}
+function wl(v){ if(v == null) return ''; const s = Array.isArray(v) ? v[0] : v; const m = /\[\[([^\]|#]+)/.exec(String(s)); return (m ? m[1] : String(s ?? '')).trim(); }
+function wls(v){ if(v == null) return []; return (Array.isArray(v) ? v : [v]).map(wl).filter(Boolean); }
+function inline(s){
+  s = String(s ?? '').replace(/📅\s*\d{4}-\d{2}-\d{2}/g,'').replace(/✅\s*\d{4}-\d{2}-\d{2}/g,'');
+  let out = esc(s);
+  out = out.replace(/!?\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]/g, (m,a,b) => `<span class="wl">${b || a.split('#')[0].split('/').filter(Boolean).pop() || a}</span>`);
+  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+  return out.trim();
+}
+function plain(s){ return inline(s).replace(/<[^>]+>/g, ''); }
+function oLink(path){ return `obsidian://open?vault=${encodeURIComponent(state.vaultName)}&file=${encodeURIComponent(path.replace(/\.md$/i,''))}`; }
+function fileLink(f, label){ return `<a href="${oLink(f.path)}">${esc(label ?? f.base)}</a>`; }
+function stripCode(s){ return s.replace(/```[\s\S]*?```/g,'').replace(/`[^`\n]*`/g,''); }
+function tableView(head, rows){
+  if(!rows.length) return '';
+  return `<details class="tv"><summary>表格视图</summary><table><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${
+    rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table></details>`;
+}
+
+/* ================= frontmatter ================= */
+function unq(v){
+  v = String(v).trim();
+  if((v.startsWith('"') && v.endsWith('"') && v.length > 1) || (v.startsWith("'") && v.endsWith("'") && v.length > 1)) return v.slice(1, -1);
+  return v.replace(/\s+#.*$/, '');
+}
+function splitList(s){
+  const out = []; let cur = '', depth = 0, q = null;
+  for(const ch of s){
+    if(q){ cur += ch; if(ch === q) q = null; continue; }
+    if(ch === '"' || ch === "'"){ q = ch; cur += ch; continue; }
+    if(ch === '[') depth++;
+    if(ch === ']') depth--;
+    if(ch === ',' && depth === 0){ out.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  if(cur.trim()) out.push(cur);
+  return out.map(x => x.trim());
+}
+function parseFrontmatter(text){
+  text = String(text).replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  if(!text.startsWith('---\n')) return {fm:{}, body:text};
+  const end = text.indexOf('\n---', 3);
+  if(end < 0) return {fm:{}, body:text};
+  const raw = text.slice(4, end);
+  const body = text.slice(end + 4).replace(/^[^\n]*\n?/, '');
+  const fm = {}; let key = null;
+  for(const line of raw.split('\n')){
+    const li = /^\s*-\s+(.*)$/.exec(line);
+    if(li && key && (fm[key] === null || Array.isArray(fm[key]))){
+      if(!Array.isArray(fm[key])) fm[key] = [];
+      fm[key].push(unq(li[1])); continue;
+    }
+    const kv = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
+    if(!kv) continue;
+    key = kv[1]; const v = kv[2].trim();
+    if(v === ''){ fm[key] = null; continue; }
+    if(v.startsWith('[') && v.endsWith(']') && !/^\[\[[^\]]*\]\]$/.test(v)) fm[key] = splitList(v.slice(1, -1)).map(unq).filter(Boolean);
+    else fm[key] = unq(v);
+  }
+  return {fm, body};
+}
+
+/* ================= 解析项目：待办 & 进展日志 ================= */
+function extractTasks(f){
+  const out = []; let section = '', inCode = false;
+  for(const line of f.body.split('\n')){
+    if(/^\s*```/.test(line)){ inCode = !inCode; continue; }
+    if(inCode) continue;
+    const hm = /^##\s+(.+)$/.exec(line);
+    if(hm){ section = hm[1].trim(); continue; }
+    const m = /^(\s*)[-*] \[(.)\]\s+(.*)$/.exec(line);
+    if(!m) continue;
+    const text = m[3];
+    const due = (/📅\s*(\d{4}-\d{2}-\d{2})/.exec(text) || [])[1];
+    out.push({text, done:/[xX]/.test(m[2]), due: due ? parseDate(due) : null, waiting:/⏳/.test(text), section, file:f});
+  }
+  return out;
+}
+/* 旅行方案里常见的表格式待办：| 优先级 | 事项 | ☐ / ☑ | */
+function extractTableBoxes(f){
+  const out = [];
+  for(const line of f.body.split('\n')){
+    if(!/^\s*\|/.test(line) || !/[☐☑✅]/.test(line)) continue;
+    const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+    const box = cells.find(c => /^[☐☑✅]$/.test(c));
+    if(!box) continue;
+    const text = cells.filter(c => c !== box).sort((a, b) => b.length - a.length)[0] || '';
+    const pri = cells.find(c => /^[🔴🟠🟡🟢]$/u.test(c)) || '';
+    out.push({text, pri, done: box !== '☐'});
+  }
+  return out;
+}
+function extractLogs(f){
+  const lines = f.body.split('\n'); const logs = [];
+  lines.forEach((l, i) => {
+    const m = /^###\s+(\d{4}-\d{2}-\d{2})\s*(.*)$/.exec(l);
+    if(!m) return;
+    let title = m[2].replace(/^\s*(（[^）]*）)?\s*[·\-—:：]?\s*/, '').trim();
+    if(!title){
+      for(let j = i + 1; j < lines.length && j < i + 8; j++){
+        const t = lines[j].trim();
+        if(!t) continue;
+        if(/^#/.test(t)) break;
+        title = t.replace(/^[-*>]\s*/, ''); break;
+      }
+    }
+    logs.push({date:parseDate(m[1]), title});
+  });
+  return logs.sort((a, b) => b.date - a.date);
+}
+
+/* ================= 读取数据源 ================= */
+async function readHandle(root){
+  const files = [], dirs = [], jobs = [];
+  async function walk(dir, prefix){
+    for await (const [name, h] of dir.entries()){
+      if(name.startsWith('.')) continue;
+      const p = prefix ? `${prefix}/${name}` : name;
+      if(h.kind === 'directory'){ dirs.push(p); await walk(h, p); }
+      else if(/\.md$/i.test(name)) jobs.push(h.getFile().then(async file => { files.push({path:p, text:await file.text(), mtime:file.lastModified}); }));
+    }
+  }
+  await walk(root, '');
+  await Promise.all(jobs);
+  return {name:root.name, files, dirs};
+}
+async function readFileList(list){
+  const files = [], dirSet = new Set(); let name = '';
+  await Promise.all([...list].map(async f => {
+    const parts = (f.webkitRelativePath || f.name).split('/');
+    name = parts[0];
+    const rel = parts.slice(1);
+    if(!rel.length || rel.some(s => s.startsWith('.'))) return;
+    for(let i = 1; i < rel.length; i++) dirSet.add(rel.slice(0, i).join('/'));
+    if(!/\.md$/i.test(f.name)) return;
+    files.push({path:rel.join('/'), text:await f.text(), mtime:f.lastModified});
+  }));
+  return {name, files, dirs:[...dirSet], noDirInfo:true};
+}
+
+/* ================= 规则：从 CLAUDE.md 读目录表与字段取值 ================= */
+function loadRules(raw){
+  const f = raw.files.find(x => x.path === 'CLAUDE.md');
+  const text = f ? String(f.text).replace(/\r\n?/g, '\n') : '';
+  // 「七、字段取值表」里形如 | `goal` | … | [[目标A]] · [[目标B]] | 的行，取最后一格
+  const row = key => {
+    const m = new RegExp('^\\|\\s*`' + key + '`\\s*\\|.*\\|\\s*([^|\\n]+?)\\s*\\|\\s*$', 'm').exec(text);
+    return m ? m[1].split('·').map(s => s.replace(/\[\[|\]\]|`/g, '').trim()).filter(Boolean) : null;
+  };
+  // 「二、目录结构」代码块：顶格的 xxx/ 是顶层目录，顶格的 xxx.ext 是根目录文件，缩进的 ├ xxx/ 是上一个顶层目录的子目录
+  let dirs = null, roots = null;
+  const parentOf = {};
+  const tree = /##[^\n]*目录结构[^\n]*\n+```[^\n]*\n([\s\S]*?)```/.exec(text);
+  if(tree){
+    const d = [], r = []; let cur = '', m;
+    for(const line of tree[1].split('\n')){
+      if((m = /^([^\s.├└│][^/\s]*)\//.exec(line))){ cur = m[1]; d.push(cur); }
+      else if((m = /^([^\s├└│]\S*\.[A-Za-z]+)(\s|$)/.exec(line))) r.push(m[1]);
+      else if(cur && (m = /^\s+[├└│]?\s*([^\s/]+)\//.exec(line))) parentOf[m[1]] = cur;
+    }
+    if(d.length) dirs = d;
+    if(r.length) roots = r;
+  }
+  // 「五、类型速查表」：每行 | `type` | 目录 | frontmatter | 正文结构 |；目录里的子目录（如 C-Strategies）归到它的顶层目录，xxx.md 表示根目录
+  let schema = null;
+  const sec = /##[^\n]*类型速查表[^\n]*\n([\s\S]*?)(?=\n##\s|\n---|$)/.exec(text);
+  if(sec){
+    const sc = {};
+    for(const line of sec[1].split('\n')){
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      if(cells.length < 3) continue;
+      const types = [...cells[0].matchAll(/`([a-z]+)`/g)].map(m => m[1]);
+      if(!types.length) continue;
+      const locs = [...cells[1].matchAll(/[0-9A-Z][^\s/→`|<>]*/g)].map(m => m[0]);
+      const tops = [...new Set(locs.map(x => /\.\w+$/.test(x) ? '' : (parentOf[x] || x)))];
+      const keys = cells[2].split(/[,，、]/).map(k => k.trim()).filter(k => /^[a-z]+$/.test(k));
+      types.forEach(t => sc[t] = {dirs:tops, keys});
+    }
+    if(Object.keys(sc).length) schema = sc;
+  }
+  const goal = row('goal'), field = row('field'), emo = row('emotiontype'), status = row('status');
+  KNOWN_TOP = dirs || DEFAULT_TOP;
+  ROOT_FILES = roots || DEFAULT_ROOT;
+  SCHEMA = schema || DEFAULT_SCHEMA;
+  EMOTIONS = emo || DEFAULT_EMOTIONS;
+  STATUS = status || DEFAULT_STATUS;
+  GOALS = goal || [];
+  FIELDS = field || [];
+  const missing = [!f && 'CLAUDE.md', f && !dirs && '目录结构', f && !schema && '类型速查表', f && !goal && 'goal', f && !field && 'field',
+    f && !emo && 'emotiontype', f && !status && 'status'].filter(Boolean);
+  return {found:!!f, missing};
+}
+
+/* 策略开头的等级行（CLAUDE.md 6.10）：> 🟡 部分验证 · 验证 3 次（支持 2 / 反例 1）· 更新 2026-10-14
+   只照抄 AI 写的等级，另外核对次数与等级对不对得上；多步策略有一步没现场时封顶在「部分验证」，等级行末尾注明「缺第 N 步」 */
+function parseGrade(f){
+  const head = f.body.split(/^##\s/m)[0];
+  const m = /^[ \t]*>.*?(存疑|待验证|部分验证|已验证).*$/m.exec(head);
+  const old = /(部分转正|转正|发育中)/.exec(f.body);
+  if(!m || !/验证\s*\d+\s*次/.test(m[0])) return {level:null, legacy:old ? old[1] : ''};
+  const line = m[0], level = m[1];
+  const num = re => { const x = re.exec(line); return x ? +x[1] : null; };
+  const n = num(/验证\s*(\d+)\s*次/), sup = num(/支持\s*(\d+)/), con = num(/反例\s*(\d+)/);
+  const up = parseDate((/更新\s*(\d{4}-\d{2}-\d{2})/.exec(line) || [])[1]);
+  const gap = (/缺第[^·]*?步/.exec(line) || [''])[0];
+  const issues = [];
+  if(sup == null || con == null) issues.push('没写支持 / 反例次数');
+  else {
+    if(n !== sup + con) issues.push(`验证 ${n} 次 ≠ 支持 ${sup} + 反例 ${con}`);
+    const exp = con >= 1 && con >= sup ? '存疑' : sup === 0 ? '待验证' : sup <= 2 ? '部分验证' : '已验证';
+    if(exp !== level && !(level === '部分验证' && exp === '已验证' && gap))
+      issues.push(level === '部分验证' && exp === '已验证' ? '按次数应为「已验证」；若是多步封顶，等级行要注明缺第几步' : `按次数应为「${exp}」`);
+  }
+  return {level, n, sup, con, up, gap, issues};
+}
+
+/* ================= 模型 ================= */
+function buildModel(raw){
+  const rules = loadRules(raw);
+  const files = raw.files.map(f => {
+    const {fm, body} = parseFrontmatter(f.text);
+    const parts = f.path.split('/');
+    return {
+      path:f.path, base:parts[parts.length-1].replace(/\.md$/i, ''), top:parts.length > 1 ? parts[0] : '',
+      fm, body, type: typeof fm.type === 'string' ? fm.type : '', mtime:f.mtime,
+      created:parseDate(fm.created), updated:parseDate(fm.updated),
+    };
+  }).sort((a, b) => a.path.localeCompare(b.path, 'zh'));
+  const by = t => files.filter(f => f.type === t);
+  const projects = files.filter(f => f.type === 'project' && f.top === 'A-Projects');
+  const holidays = files.filter(f => f.type === 'holiday' && f.top === 'A-Holidays');
+  const archived = files.filter(f => (f.type === 'project' || f.type === 'holiday') && f.top === 'A-Archive');
+  for(const p of [...projects, ...holidays, ...archived]){ p.tasks = extractTasks(p); p.logs = extractLogs(p); }
+  for(const h of holidays) h.boxes = extractTableBoxes(h);
+  const strategies = by('strategy');
+  for(const s of strategies) s.grade = parseGrade(s);
+  const goals = new Set(GOALS);
+  [...projects, ...archived].forEach(p => { const g = wl(p.fm.goal); if(g) goals.add(g); });
+  return {
+    files, projects, holidays, archived, goals, rules, dirs:raw.dirs || [], noDirInfo:!!raw.noDirInfo,
+    moods:by('emotion'), insights:by('insight'), dialogues:by('dialogue'), topics:by('topic'),
+    strategies, situations:by('situation'), memoirs:by('memoir'),
+    profile:files.find(f => f.type === 'profile' && !f.top) || null,
+    unclear:files.filter(f => f.top === '0-Unclear'), inbox:files.filter(f => f.top === '0-Inbox'),
+  };
+}
+
+/* ================= 渲染：总入口 ================= */
+function subline(t){
+  const h = new Date().getHours();
+  const greet = h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+  const q = Math.floor(t.getMonth() / 3) + 1;
+  const qEnd = new Date(t.getFullYear(), q * 3, 0);
+  return `${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日 周${WEEK[t.getDay()]} · ${greet} · Q${q} 还剩 ${dd(t, qEnd)} 天`;
+}
+
+function render(){
+  const M = state.model; if(!M) return;
+  const t = today();
+  $('#sub').textContent = subline(t);
+  const live = M.projects.filter(p => p.fm.status !== 'done');
+  const active = live.filter(p => p.fm.status === 'active');
+  const planned = live.filter(p => p.fm.status === 'planned');
+  const trips = M.holidays.filter(h => h.fm.status !== 'done');
+  const openDue = [...live, ...trips].flatMap(p => p.tasks.filter(x => !x.done && x.due)).sort((a, b) => a.due - b.due);
+  const nextTrip = trips.map(h => ({h, start:parseDate(h.fm.start)})).filter(x => x.start && dd(t, x.start) >= 0).sort((a, b) => a.start - b.start)[0];
+  const overdue = openDue.filter(x => dd(t, x.due) < 0);
+  const soon = openDue.filter(x => { const n = dd(t, x.due); return n >= 0 && n <= 7; });
+  const stale = active.filter(p => p.updated && dd(p.updated, t) > 14).map(p => ({p, days:dd(p.updated, t)})).sort((a, b) => b.days - a.days);
+  const debt = computeDebt(M, t);
+
+  const tile = (label, value, foot) => `<div class="card tile"><div class="label">${label}</div><div class="value">${value}</div><div class="foot">${foot}</div></div>`;
+  const tiles = `<section class="tiles" style="margin-top:0">
+    ${tile('活项目', active.length, `另有 planned ${planned.length} · 归档 ${M.archived.length}`)}
+    ${tile('逾期待办', overdue.length, overdue.length ? `<span class="st crit">最久逾期 ${-dd(t, overdue[0].due)} 天</span>` : `<span class="st good">无逾期</span>`)}
+    ${tile('7 天内到期', soon.length, soon.length ? `${relDay(soon[0].due)} · ${plain(soon[0].text)}` : '—')}
+    ${tile('停滞项目', stale.length, stale.length ? `<span class="st serious">最久：${esc(stale[0].p.base)} · ${stale[0].days} 天</span>` : `<span class="st good">都在动</span>`)}
+    ${tile('旅行计划', trips.length, nextTrip ? `${esc(nextTrip.h.base)} · ${relDay(nextTrip.start)}出发` : '没有已定出发日的行程')}
+    ${tile('沉淀债', debt.total, `待转录 ${debt.trans.length} · 待明确 ${debt.unclear.length} · Inbox ${debt.inbox.length}`)}
+  </section>`;
+
+  $('#main').innerHTML = tiles
+    + `<section class="grid-2">${deadlineHTML(openDue, t)}${debtHTML(debt, t)}</section>`
+    + projectsHTML(live, t)
+    + holidaysHTML(trips, t)
+    + lifeHTML(M, t)
+    + distillHTML(M, t)
+    + healthHTML(M, t);
+}
+
+/* ================= Deadline 雷达 ================= */
+function deadlineHTML(list, t){
+  const next = list.find(x => dd(t, x.due) >= 0);
+  const row = x => {
+    const n = dd(t, x.due);
+    const cls = n < 0 ? 'crit' : n <= 1 ? 'serious' : n <= 7 ? 'warn' : 'idle';
+    const label = n < 0 ? `逾期 ${-n} 天` : relDay(x.due);
+    return `<div class="dl-row"><span class="st ${cls}">${label}</span><div>
+      <div class="dl-text">${inline(x.text)}</div>
+      <div class="dl-proj">${fileLink(x.file)} · 📅 ${fmtMD(x.due)}${x.waiting ? ' · ⏳ 等待中' : ''}${n < 0 ? ' · 若已完成，去原文件勾掉' : ''}</div>
+    </div></div>`;
+  };
+  const groups = [
+    ['逾期', x => dd(t, x.due) < 0, false],
+    ['今天 / 明天', x => { const n = dd(t, x.due); return n === 0 || n === 1; }, false],
+    ['14 天内', x => { const n = dd(t, x.due); return n > 1 && n <= 14; }, false],
+    ['更远', x => dd(t, x.due) > 14, true],
+  ];
+  let html = `<div class="card"><h3>⏰ Deadline 雷达<span class="hint">未完成的 📅 待办 · ${list.length} 条</span></h3>`;
+  if(next) html += `<div class="hero-next"><div class="muted small">下一个硬期限 · ${relDay(next.due)}（${fmtMD(next.due)}）</div>
+    <div class="hero-text">${inline(next.text)}</div><div class="dl-proj">${fileLink(next.file)}</div></div>`;
+  for(const [name, fn, fold] of groups){
+    const g = list.filter(fn); if(!g.length) continue;
+    html += `<div class="dl-group-title">${name} · ${g.length}</div>`;
+    html += fold ? `<details class="more"><summary>展开 ${g.length} 条 ›</summary>${g.map(row).join('')}</details>` : g.map(row).join('');
+  }
+  if(!list.length) html += `<p class="empty">没有带 📅 的未完成待办。</p>`;
+  return html + `</div>`;
+}
+
+/* ================= 沉淀债 ================= */
+function computeDebt(M, t){
+  const age = f => f.created ? dd(f.created, t) : (f.mtime ? dd(new Date(f.mtime), t) : null);
+  const byAge = (a, b) => (b.days ?? -1) - (a.days ?? -1);
+  const trans = M.insights.filter(f => f.base.includes('待转录')).map(f => ({f, days:age(f)})).sort(byAge);
+  const unclear = M.unclear.map(f => ({f, days:age(f)})).sort(byAge);
+  const inbox = M.inbox.map(f => ({f, days:age(f)})).sort(byAge);
+
+  const y = t.getFullYear(), q = Math.floor(t.getMonth() / 3) + 1, qStart = new Date(y, (q - 1) * 3, 1), qName = `${y}-Q${q}`;
+  const memo = M.memoirs.find(f => String(f.fm.period) === qName || f.base === qName);
+  let memoLast = null;
+  if(memo) for(const m of memo.body.matchAll(/^\s*-\s+(\d{4}-\d{2}-\d{2})/gm)){ const d = parseDate(m[1]); if(!memoLast || d > memoLast) memoLast = d; }
+  const pending = [...M.moods, ...M.insights, ...M.dialogues]
+    .filter(f => f.created && f.created >= qStart && (!memoLast || f.created > memoLast))
+    .sort((a, b) => b.created - a.created);
+
+  const sits = M.situations.map(s => {
+    const up = s.updated || s.created;
+    const newer = [...M.moods, ...M.insights].filter(f => up && f.created && f.created > up && wls(f.fm.situation).includes(s.base));
+    return {f:s, up, newer};
+  }).filter(x => x.newer.length).sort((a, b) => b.newer.length - a.newer.length);
+
+  return {trans, unclear, inbox, memo:{qName, memo, memoLast, pending}, sits,
+    total: trans.length + unclear.length + inbox.length};
+}
+function debtHTML(D, t){
+  const item = (n, what, sub, list) => {
+    const numCls = n ? 'n' : 'n zero';
+    if(!n || !list) return `<div class="row"><span class="${numCls}">${n}</span><span class="what">${what}<small>${sub}</small></span><span></span></div>`;
+    return `<details><summary><span class="${numCls}">${n}</span><span class="what">${what}<small>${sub}</small></span><span class="chev">›</span></summary><ul>${list}</ul></details>`;
+  };
+  const li = (f, right) => `<li><span>${fileLink(f)}</span><span>${right}</span></li>`;
+  const ageTxt = d => d == null ? '' : `${d} 天`;
+  const M2 = D.memo;
+  return `<div class="card"><h3>🧪 沉淀债 · 蒸馏端<span class="hint">捕捉进来、还没被消化的</span></h3><div class="debt">
+    ${item(M2.pending.length, `条现场未汇入 ${M2.qName} 回忆录`,
+      M2.memo ? `时间线停在 ${ymd(M2.memoLast || t)}` : '本季回忆录尚未生成',
+      M2.pending.slice(0, 40).map(f => li(f, fmtMD(f.created))).join(''))}
+    ${item(D.sits.length, '个情境综述落后于素材', D.sits.length ? `新增素材最多：${esc(D.sits[0].f.base)} +${D.sits[0].newer.length}` : '✓ 综述是新的',
+      D.sits.map(x => li(x.f, `停在 ${fmtMD(x.up)} · 之后 +${x.newer.length}`)).join(''))}
+    ${item(D.trans.length, '条 insight 待转录', D.trans.length ? `最久 ${D.trans[0].days} 天` : '✓ 无',
+      D.trans.map(x => li(x.f, ageTxt(x.days))).join(''))}
+    ${item(D.unclear.length, '条待明确（等你勾选）', D.unclear.length ? `最久 ${D.unclear[0].days} 天` : '✓ 无',
+      D.unclear.map(x => li(x.f, ageTxt(x.days))).join(''))}
+    ${item(D.inbox.length, '条 Inbox 未整理', D.inbox.length ? '说「整理收件箱」' : '✓ 收件箱是空的',
+      D.inbox.map(x => li(x.f, ageTxt(x.days))).join(''))}
+  </div></div>`;
+}
+
+/* ================= 项目卡片 ================= */
+function projectsHTML(live, t){
+  const rank = p => p.fm.status === 'active' ? 0 : 1;
+  const sorted = [...live].sort((a, b) => rank(a) - rank(b) || (b.updated || 0) - (a.updated || 0));
+  const nA = live.filter(p => p.fm.status === 'active').length;
+  return `<section><div class="sec-head"><h2>🟢 项目</h2><span class="muted small">${nA} active · ${live.length - nA} planned · 点项目名在 Obsidian 打开</span></div>
+    <div class="proj-grid">${sorted.map(p => projCard(p, t)).join('')}</div></section>`;
+}
+function projCard(p, t){
+  const tasks = p.tasks, total = tasks.length, done = tasks.filter(x => x.done).length;
+  const waiting = tasks.filter(x => !x.done && x.waiting).length;
+  const overdue = tasks.filter(x => !x.done && x.due && dd(t, x.due) < 0).length;
+  const next = tasks.filter(x => !x.done && !x.waiting).slice(0, 3);
+  const days = p.updated ? dd(p.updated, t) : null;
+  const isStale = p.fm.status === 'active' && days != null && days > 14;
+  const log = p.logs[0];
+  const goal = wl(p.fm.goal);
+  return `<article class="card proj${isStale ? ' stale' : ''}">
+    <div class="proj-top">${fileLink(p).replace('<a ', '<a class="proj-name" ')}${goal ? `<span class="chip">${esc(goal)}</span>` : ''}</div>
+    <div class="proj-meta">
+      <span>${esc(p.fm.status || '无 status')}</span>
+      <span>${p.updated ? `更新于 ${relDay(p.updated)}` : '无 updated'}</span>
+      ${isStale ? `<span class="st serious">停滞 ${days} 天</span>` : ''}
+      ${overdue ? `<span class="st crit">逾期 ${overdue} 条</span>` : ''}
+      ${waiting ? `<span>⏳ 等待 ${waiting}</span>` : ''}
+    </div>
+    ${total ? `<div class="prog" title="已勾 ${done} / 共 ${total}"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div><div class="prog-l">待办已勾 ${done} / ${total}</div>` : ''}
+    ${log ? `<div class="proj-log"><span class="d">${fmtMD(log.date)}</span>${inline(log.title)}</div>` : ''}
+    ${next.length ? `<ul class="proj-next">${next.map(x => `<li><div>${inline(x.text)}</div></li>`).join('')}</ul>` : `<div class="muted small">没有可动手的待办${waiting ? '（只剩等待项）' : ''}</div>`}
+  </article>`;
+}
+
+/* ================= 旅行计划 ================= */
+function holidaysHTML(trips, t){
+  if(!trips.length) return `<section><div class="sec-head"><h2>✈️ 旅行计划</h2><span class="muted small">A-Holidays 里没有未结束的行程</span></div></section>`;
+  const rank = h => h.fm.status === 'active' ? 0 : 1;
+  const when = h => parseDate(h.fm.start);
+  const sorted = [...trips].sort((a, b) => rank(a) - rank(b) || ((when(a) || 8e15) - (when(b) || 8e15)));
+  const nA = trips.filter(h => h.fm.status === 'active').length;
+  return `<section><div class="sec-head"><h2>✈️ 旅行计划</h2><span class="muted small">${nA} active · ${trips.length - nA} planned · 状态与出发日取自 frontmatter</span></div>
+    <div class="proj-grid">${sorted.map(h => tripCard(h, t)).join('')}</div></section>`;
+}
+function tripCard(h, t){
+  const start = parseDate(h.fm.start);
+  const n = start ? dd(t, start) : null;
+  const startTxt = start ? (n > 0 ? `${n} 天后出发` : n === 0 ? '今天出发' : `已出发 ${-n} 天`) : '出发日未定';
+  const startCls = n == null ? 'idle' : n < 0 ? 'good' : n <= 3 ? 'serious' : n <= 14 ? 'warn' : 'idle';
+  const items = [...h.tasks.map(x => ({text:x.text, done:x.done, pri:''})), ...(h.boxes || [])];
+  const total = items.length, done = items.filter(x => x.done).length;
+  const open = items.filter(x => !x.done);
+  const priRank = p => ({'🔴':0, '🟠':1, '🟡':2, '🟢':3}[p] ?? 4);
+  const next = [...open].sort((a, b) => priRank(a.pri) - priRank(b.pri)).slice(0, 3);
+  return `<article class="card proj">
+    <div class="proj-top">${fileLink(h).replace('<a ', '<a class="proj-name" ')}</div>
+    <div class="proj-meta">
+      <span>${esc(h.fm.status || '无 status')}</span>
+      <span class="st ${startCls}">${startTxt}${start ? `（${fmtMD(start)}）` : ''}</span>
+      <span>${h.updated ? `更新于 ${relDay(h.updated)}` : '无 updated'}</span>
+    </div>
+    ${total ? `<div class="prog" title="已勾 ${done} / 共 ${total}"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div><div class="prog-l">待办已勾 ${done} / ${total}（含表格里的 ☐）</div>` : ''}
+    ${next.length ? `<ul class="proj-next">${next.map(x => `<li><div>${x.pri ? x.pri + ' ' : ''}${inline(x.text)}</div></li>`).join('')}</ul>` : `<div class="muted small">没有未勾的待办</div>`}
+  </article>`;
+}
+
+/* ================= 生活与捕捉 ================= */
+function collectEvents(M){
+  const ev = [];
+  const add = (d, kind, title, f) => { if(d) ev.push({d, kind, title, f}); };
+  M.moods.forEach(f => add(f.created, 'emotion', f.base, f));
+  M.insights.forEach(f => add(f.created, 'insight', f.base, f));
+  M.dialogues.forEach(f => add(f.created, 'dialogue', f.base, f));
+  M.topics.forEach(f => add(f.created, 'topic', f.base, f));
+  [...M.projects, ...M.holidays, ...M.archived].forEach(p => p.logs.forEach(l => add(l.date, 'log', `${p.base}：${plain(l.title) || '进展'}`, p)));
+  return ev;
+}
+function lifeHTML(M, t){
+  const months = state.range;
+  const weeks = {3:13, 6:26, 12:53}[months];
+  const ev = collectEvents(M);
+  const dow = (t.getDay() + 6) % 7;
+  const start = addDays(t, -dow - (weeks - 1) * 7);
+  const seg = `<div class="seg" role="group" aria-label="时间范围">${[3, 6, 12].map(n =>
+    `<button type="button" data-range="${n}" class="${n === months ? 'on' : ''}" aria-pressed="${n === months}">近 ${n} 个月</button>`).join('')}</div>`;
+
+  const moodsIn = M.moods.filter(f => f.created && f.created >= start && f.created <= t);
+  const insIn = M.insights.filter(f => f.created && f.created >= start && f.created <= t);
+
+  // 情绪
+  const emo = EMOTIONS.map(e => {
+    const hit = moodsIn.filter(f => wls(f.fm.emotiontype).includes(e));
+    return {label:EMO_ZH[e] || e, value:hit.length,
+      tip:`<b>${esc(EMO_ZH[e] || e)} · ${esc(e)}</b><br>${hit.length} 条情绪记录${hit.length ? '<br>' + hit.slice(0, 5).map(f => `<span class="m">· ${esc(f.base)}</span>`).join('<br>') : ''}`};
+  }).sort((a, b) => b.value - a.value);
+
+  // 情境
+  const sitNames = M.situations.map(s => s.base);
+  const sit = sitNames.map(s => {
+    const mh = moodsIn.filter(f => wls(f.fm.situation).includes(s)).length;
+    const ih = insIn.filter(f => wls(f.fm.situation).includes(s)).length;
+    return {label:s, value:mh + ih, tip:`<b>${esc(s)}</b><br>情绪 ${mh} · insight ${ih}`};
+  }).sort((a, b) => b.value - a.value);
+
+  // 捕捉 vs 蒸馏
+  const ms = []; for(let i = months - 1; i >= 0; i--) ms.push(new Date(t.getFullYear(), t.getMonth() - i, 1));
+  const inMonth = (d, m) => d && d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth();
+  const monthly = ms.map(m => {
+    const mo = M.moods.filter(f => inMonth(f.created, m)).length;
+    const ins = M.insights.filter(f => inMonth(f.created, m)).length;
+    const dia = M.dialogues.filter(f => inMonth(f.created, m)).length;
+    const st = M.strategies.filter(f => inMonth(f.created, m)).length;
+    return {m, a:mo + ins + dia, b:st, mo, ins, dia};
+  });
+
+  const recent = [...M.moods].filter(f => f.created).sort((a, b) => b.created - a.created).slice(0, 8);
+
+  return `<section><div class="sec-head"><h2>❤️ 生活与捕捉</h2>${seg}</div>
+    <div class="stack">
+      ${heatmapHTML(ev, t, start, weeks, M)}
+      <div class="grid-3">
+        <div class="card"><h3>情绪分布<span class="hint">情绪记录 · ${moodsIn.length} 条</span></h3>
+          ${moodsIn.length ? hbars(emo, '46px') : '<p class="empty">这段时间没有情绪记录。</p>'}
+          ${tableView(['情绪', '条数'], emo.map(e => [e.label, e.value]))}</div>
+        <div class="card"><h3>情境分布<span class="hint">情绪 + insight</span></h3>
+          ${hbars(sit, '104px')}
+          ${tableView(['情境', '条数'], sit.map(e => [e.label, e.value]))}</div>
+        ${monthlyHTML(monthly)}
+      </div>
+      <div class="card"><h3>最近的情绪记录<span class="hint">只列标题 · 现场原文在 Obsidian 里</span></h3>
+        <ul class="moods">${recent.map(f => `<li><span class="d">${fmtMD(f.created)}</span><div>
+          <div class="t">${fileLink(f)}</div>
+          <div class="e">${wls(f.fm.emotiontype).map(e => `<span class="chip">${esc(EMO_ZH[e] || e)}</span>`).join('')}${wls(f.fm.situation).map(s => `<span class="chip">${esc(s)}</span>`).join('')}</div>
+        </div></li>`).join('')}</ul></div>
+    </div></section>`;
+}
+function heatmapHTML(ev, t, start, weeks, M){
+  const map = new Map();
+  for(const e of ev){ if(e.d < start || e.d > t) continue; const k = ymd(e.d); if(!map.has(k)) map.set(k, []); map.get(k).push(e); }
+  let cells = '', months = '', total = 0, activeDays = 0, streak = 0, best = 0;
+  const rows = [];
+  for(let w = 0; w < weeks; w++){
+    const col = addDays(start, w * 7);
+    let label = '';
+    for(let r = 0; r < 7; r++){ const d = addDays(col, r); if(d.getDate() === 1 && d <= t) label = `${d.getMonth() + 1}月`; }
+    if(w === 0 && !label && col.getDate() <= 20) label = `${col.getMonth() + 1}月`;
+    months += `<span>${label}</span>`;
+    for(let r = 0; r < 7; r++){
+      const d = addDays(col, r);
+      if(d > t){ cells += `<i class="fut"></i>`; continue; }
+      const list = map.get(ymd(d)) || [];
+      const n = list.length;
+      total += n;
+      if(n){ activeDays++; streak++; best = Math.max(best, streak); } else streak = 0;
+      const b = n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : n <= 7 ? 4 : 5;
+      const kinds = {}; list.forEach(e => kinds[e.kind] = (kinds[e.kind] || 0) + 1);
+      const kindTxt = Object.entries(kinds).map(([k, v]) => `${KIND_ZH[k]} ${v}`).join(' · ');
+      const tip = `<b>${ymd(d)} 周${WEEK[d.getDay()]}</b><br>${n ? `${n} 条 · ${kindTxt}<br>${list.slice(0, 4).map(e => `<span class="m">· ${esc(e.title)}</span>`).join('<br>')}${n > 4 ? `<br><span class="m">…另 ${n - 4} 条</span>` : ''}` : '<span class="m">无记录</span>'}`;
+      cells += `<i class="b${b}${dd(d, t) === 0 ? ' today' : ''}" data-tip="${esc(tip)}"></i>`;
+      if(n) rows.push([ymd(d), n, kindTxt.replace(/[❤️💡📜📚🟢]\S*\s?/gu, '')]);
+    }
+  }
+  const lastMood = [...M.moods].filter(f => f.created).sort((a, b) => b.created - a.created)[0];
+  const legend = `<div class="hm-legend">少 ${[0,1,2,3,4,5].map(i => `<i style="background:var(--seq${i})"></i>`).join('')} 多<span style="margin-left:10px">（情绪 / insight / 对话 / topic 新建 + 项目与旅行日志条目）</span></div>`;
+  return `<div class="card"><h3>捕捉日历<span class="hint">每格一天 · 悬停看明细</span></h3>
+    <div class="hm-wrap">
+      <div class="hm" style="--cell:${{13:22, 26:17, 53:13}[weeks] || 13}px">
+        <div class="hm-days"><span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span></div>
+        <div class="hm-scroll"><div class="hm-months">${months}</div><div class="hm-grid">${cells}</div></div>
+      </div>
+      <div class="hm-stats">
+        <div><div class="v">${total}</div><div class="l">条记录</div></div>
+        <div><div class="v">${activeDays}</div><div class="l">天有捕捉</div></div>
+        <div><div class="v">${best}</div><div class="l">最长连续天数</div></div>
+        <div><div class="v">${lastMood ? relDay(lastMood.created) : '—'}</div><div class="l">上一条情绪记录</div></div>
+      </div>
+    </div>
+    ${legend}
+    ${tableView(['日期', '条数', '构成'], rows.reverse())}
+  </div>`;
+}
+function hbars(items, lw){
+  const max = Math.max(1, ...items.map(i => i.value));
+  return `<div class="hbars" style="--lw:${lw}">${items.map(i => `<div class="hb-row" tabindex="0" data-tip="${esc(i.tip)}">
+    <span class="hb-label">${esc(i.label)}</span><span class="hb-track"><i style="width:${(i.value / max * 100).toFixed(1)}%"></i></span><span class="hb-val">${i.value}</span></div>`).join('')}</div>`;
+}
+function monthlyHTML(data){
+  const raw = Math.max(1, ...data.map(d => Math.max(d.a, d.b)));
+  const step = raw <= 5 ? 1 : raw <= 10 ? 2 : raw <= 25 ? 5 : raw <= 50 ? 10 : 20;
+  const top = Math.ceil(raw / step) * step;
+  const ticks = [0, top / 2, top].filter(v => Number.isInteger(v));
+  const every = data.length > 8 ? 2 : 1;
+  return `<div class="card"><h3>捕捉 vs 蒸馏<span class="hint">按月新增</span></h3>
+    <div class="legend"><span><i style="--c:var(--s1)"></i>记录层（情绪 + insight + 对话）</span><span><i style="--c:var(--s2)"></i>新 strategy</span></div>
+    <div class="vc">
+      <div class="vc-y">${ticks.map(v => `<span style="bottom:${v / top * 100}%">${v}</span>`).join('')}</div>
+      <div class="vc-plot">
+        ${ticks.filter(v => v > 0).map(v => `<div class="gl" style="bottom:${v / top * 100}%"></div>`).join('')}
+        <div class="vc-groups">${data.map(d => `<div class="vc-g" tabindex="0" data-tip="${esc(`<b>${d.m.getFullYear()}年${d.m.getMonth() + 1}月</b><br>记录层 ${d.a}（情绪 ${d.mo} · insight ${d.ins} · 对话 ${d.dia}）<br>新 strategy ${d.b}`)}">
+          <i style="height:${d.a / top * 100}%"></i><i class="b" style="height:${d.b / top * 100}%"></i></div>`).join('')}</div>
+      </div>
+      <div class="vc-x">${data.map((d, i) => `<span>${(data.length - 1 - i) % every === 0 ? `${d.m.getMonth() + 1}月` : ''}</span>`).join('')}</div>
+    </div>
+    ${tableView(['月份', '记录层', '情绪', 'insight', '对话', '新 strategy'], data.map(d => [`${d.m.getFullYear()}-${p2(d.m.getMonth() + 1)}`, d.a, d.mo, d.ins, d.dia, d.b]))}
+  </div>`;
+}
+
+/* ================= 库体检（按 CLAUDE.md 的机械检查） ================= */
+/* ================= 策略证据与用户侧写 ================= */
+function distillHTML(M, t){
+  return `<section><div class="sec-head"><h2>🧭 策略证据与用户侧写</h2><span class="muted small">等级和侧写由 AI 写在文件里，这里只照抄日期与次数</span></div>
+    <div class="grid-2">${gradesHTML(M, t)}${profileHTML(M, t)}</div></section>`;
+}
+function gradesHTML(M, t){
+  const S = M.strategies;
+  const rank = s => s.grade.level ? LEVELS.findIndex(l => l.name === s.grade.level) : 9;
+  const sorted = [...S].sort((a, b) => rank(a) - rank(b) || (b.grade.n || 0) - (a.grade.n || 0) || a.base.localeCompare(b.base, 'zh'));
+  const graded = sorted.filter(s => s.grade.level), bare = sorted.filter(s => !s.grade.level);
+  const cnt = name => S.filter(s => s.grade.level === name).length;
+  const sum = LEVELS.map(l => `<span class="st ${l.cls}">${l.name} ${cnt(l.name)}</span>`).join('')
+    + (bare.length ? `<span class="st idle">未标注 ${bare.length}</span>` : '');
+  const row = s => {
+    const g = s.grade, L = LEVELS.find(l => l.name === g.level);
+    const sub = [g.sup != null ? `支持 ${g.sup} / 反例 ${g.con ?? '?'}` : '', g.up ? `更新 ${ymd(g.up)}` : '没写更新日期', esc(g.gap)]
+      .concat(g.issues.map(x => `<span class="bad">⚠ ${esc(x)}</span>`)).filter(Boolean).join(' · ');
+    return `<div class="gr-row"><span class="gr-name">${fileLink(s)}</span><span class="st ${L.cls}">${g.level} · 验证 ${g.n ?? '?'} 次</span><div class="gr-sub">${sub}</div></div>`;
+  };
+  const bareRow = s => `<div class="gr-row"><span class="gr-name">${fileLink(s)}</span><span class="st idle">未标注</span>${
+    s.grade.legacy ? `<div class="gr-sub">旧写法「${esc(s.grade.legacy)}」</div>` : ''}</div>`;
+  const nIssue = graded.filter(s => s.grade.issues.length).length;
+  let html = `<div class="card"><h3>策略证据等级<span class="hint">${S.length} 条策略${nIssue ? ` · ${nIssue} 条次数对不上` : ''}</span></h3>`;
+  if(!S.length) return html + `<p class="empty">还没有策略。</p></div>`;
+  html += `<div class="gr-sum">${sum}</div>` + graded.map(row).join('');
+  if(bare.length) html += graded.length
+    ? `<details class="more"><summary>${bare.length} 条还没有等级行 ›</summary>${bare.map(bareRow).join('')}</details>`
+    : `<p class="empty">${bare.length} 条策略都还没标证据等级。</p>
+       <details class="more"><summary>展开 ${bare.length} 条 ›</summary>${bare.map(bareRow).join('')}</details>`;
+  return html + tableView(['策略', '等级', '验证', '支持', '反例', '更新'],
+    sorted.map(s => [s.base, s.grade.level || '未标注', s.grade.n ?? '', s.grade.sup ?? '', s.grade.con ?? '', s.grade.up ? ymd(s.grade.up) : ''])) + `</div>`;
+}
+function profileHTML(M, t){
+  const P = M.profile;
+  if(!P) return `<div class="card"><h3>用户侧写<span class="hint">C-侧写.md</span></h3><p class="empty">库根目录还没有 type 为 profile 的侧写文件。</p></div>`;
+  const part = (name, cap, every, freshDays) => {
+    const m = new RegExp('^##\\s*' + name + '[^\\n]*\\n([\\s\\S]*?)(?=^##\\s|(?![\\s\\S]))', 'm').exec(P.body);
+    if(!m) return `<div class="dl-row"><span class="st serious">缺这一节</span><div><div class="dl-text">${name}</div><div class="dl-proj">没有「## ${name}」</div></div></div>`;
+    const up = parseDate((/更新\s*(\d{4}-\d{2}-\d{2})/.exec(m[1]) || [])[1]);
+    const lines = m[1].split('\n').filter(l => l.trim() && !/^#{3,}\s/.test(l) && !/^\s*更新\s*\d{4}-/.test(l)).length;
+    const days = up ? dd(up, t) : null;
+    const badge = days == null ? `<span class="st warn">还没填日期</span>`
+      : days <= freshDays ? `<span class="st good">${relDay(up)}</span>` : `<span class="st warn">${days} 天没更新</span>`;
+    return `<div class="dl-row">${badge}<div><div class="dl-text">${name} <span class="muted small">· ${every}</span></div>
+      <div class="dl-proj">${up ? `更新 ${ymd(up)}` : '第一行的「更新 YYYY-MM-DD」还没填'} · ${lines} 行${lines > cap ? `<span class="st warn" style="margin-left:6px">超过 ${cap} 行</span>` : `（上限 ${cap}）`}</div></div></div>`;
+  };
+  return `<div class="card"><h3>用户侧写<span class="hint">${fileLink(P, P.base)}</span></h3>
+    ${part('近况', 15, '每天 08:00 晨报重写', 1)}${part('画像', 30, '每月 1 日巡检重写', 31)}</div>`;
+}
+
+function healthChecks(M){
+  const C = [];
+  const add = (ok, level, title, sub, items) => C.push({ok, level, title, sub, items:items || []});
+  const L = f => fileLink(f, f.path.replace(/\.md$/i, ''));
+
+  // 0 规则文件能否读到（下面的取值检查都靠它）
+  const miss = M.rules.missing;
+  add(!miss.length, 'serious', miss.length ? `没从 CLAUDE.md 读到：${miss.join('、')}` : '规则来源：CLAUDE.md 目录表、类型速查表、字段取值表已读到',
+    miss.length ? '读不到的部分改用默认值或跳过检查（goal、field 跳过）' : '改规则后刷新本页即可跟上，不用改本页代码');
+
+  // 1 断链
+  const idx = new Set();
+  M.files.forEach(f => { idx.add(f.base.toLowerCase()); idx.add(f.path.toLowerCase()); idx.add(f.path.replace(/\.md$/i, '').toLowerCase()); });
+  M.goals.forEach(g => idx.add(g.toLowerCase()));
+  [...EMOTIONS, ...FIELDS].forEach(x => idx.add(x.toLowerCase()));
+  const dirIdx = new Set(M.dirs.map(d => d.toLowerCase()));
+  const broken = new Map(); let occ = 0, occArch = 0;
+  for(const f of M.files){
+    if(META_FILES.includes(f.path)) continue;
+    for(const m of stripCode(f.body).matchAll(/\[\[([^\]\n]+?)\]\]/g)){
+      const tg = m[1].split('|')[0].split('#')[0].split('^')[0].trim();
+      if(!tg) continue;
+      if(/\.(png|jpe?g|gif|svg|webp|pdf|mp[34]|mov|canvas|excalidraw|base|csv|xlsx?|docx?|pptx?)$/i.test(tg)) continue;
+      const low = tg.replace(/\/$/, '').toLowerCase();
+      if(idx.has(low) || idx.has(low + '.md') || dirIdx.has(low)) continue;
+      if(low.includes('/') && idx.has(low.split('/').pop())) continue;
+      if(!broken.has(f)) broken.set(f, new Set());
+      broken.get(f).add(tg); occ++;
+      if(f.path.startsWith('A-Archive/')) occArch++;
+    }
+  }
+  const targets = new Set(); broken.forEach(s => s.forEach(x => targets.add(x.toLowerCase())));
+  const bList = [...broken.entries()].sort((a, b) => b[1].size - a[1].size);
+  add(!occ, occArch > occ / 2 ? 'warn' : 'serious', `断链：${targets.size} 个目标 · ${occ} 处`,
+    occ ? `其中 ${occArch} 处在 Archive（旧"任务即文件"体系的迁移残骸）· 已排除 goal / emotiontype / field 虚拟概念与代码块` : '已排除 goal / emotiontype / field 虚拟概念与代码块',
+    bList.map(([f, s]) => `${L(f)} <span class="muted">— ${s.size} 个：${esc([...s].slice(0, 4).join('、'))}${s.size > 4 ? '…' : ''}</span>`));
+
+  // 2 缺「## 关联链接」
+  const needLinks = M.files.filter(f => ['emotion', 'insight', 'topic', 'dialogue', 'strategy', 'holiday', 'knowledge', 'profile'].includes(f.type) || M.projects.includes(f));
+  const noLinks = needLinks.filter(f => !/^##\s*关联链接/m.test(f.body));
+  const byT = {}; noLinks.forEach(f => byT[f.type] = (byT[f.type] || 0) + 1);
+  add(!noLinks.length, 'warn', `缺「## 关联链接」：${noLinks.length} / ${needLinks.length}`,
+    Object.entries(byT).map(([k, v]) => `${k} ${v}`).join(' · ') || '全部都有', noLinks.map(L));
+
+  // 3–5 字段取值表（CLAUDE.md「五、类型速查表」「七、字段取值表」）
+  const sitSet = new Set(M.situations.map(s => s.base));
+  const badType = [], badKeys = [], badVals = [];
+  const note = (f, s) => `${L(f)} <span class="muted">— ${esc(s)}</span>`;
+  const isDate = v => /^\d{4}-\d{2}-\d{2}$/.test(String(v ?? ''));
+  for(const f of M.files){
+    if(META_FILES.includes(f.path) || f.top === '0-Inbox') continue;
+    const S = SCHEMA[f.type];
+    if(!S){ badType.push(note(f, f.type ? `未知 type：${f.type}` : '没有 type')); continue; }
+    if(!S.dirs.includes(f.top)) badType.push(note(f, `${f.type} 不该放在 ${f.top || '根目录'}/`));
+    const keys = Object.keys(f.fm).filter(k => k !== 'type');
+    const miss = S.keys.filter(k => !keys.includes(k)), extra = keys.filter(k => !S.keys.includes(k));
+    if(miss.length || extra.length) badKeys.push(note(f, [miss.length ? `缺 ${miss.join('、')}` : '', extra.length ? `多 ${extra.join('、')}` : ''].filter(Boolean).join(' · ')));
+    const v = [];
+    if('status' in f.fm && !STATUS.includes(f.fm.status)) v.push(`status：${f.fm.status ?? '空'}`);
+    if(GOALS.length && 'goal' in f.fm && !GOALS.includes(wl(f.fm.goal))) v.push(`goal：${wl(f.fm.goal) || '空'}`);
+    wls(f.fm.situation).forEach(s => { if(!sitSet.has(s)) v.push(`situation：${s}`); });
+    wls(f.fm.emotiontype).forEach(x => { if(!EMOTIONS.includes(x)) v.push(`emotiontype：${x}`); });
+    if('field' in f.fm){
+      const fv = wls(f.fm.field);
+      if(FIELDS.length) fv.forEach(x => { if(!FIELDS.includes(x)) v.push(`field：${x}`); });
+      if(f.type === 'topic'){ const dir = f.path.split('/')[1]; if(fv.length !== 1 || fv[0] !== dir) v.push(`field 应为 [[${dir}]]`); }
+    }
+    ['created', 'updated'].forEach(k => { if(k in f.fm && !isDate(f.fm[k])) v.push(`${k}：${f.fm[k] ?? '空'}`); });
+    if(f.fm.start != null && !isDate(f.fm.start)) v.push(`start：${f.fm.start}`);
+    if('period' in f.fm && !/^\d{4}-Q[1-4]$/.test(String(f.fm.period))) v.push(`period：${f.fm.period}`);
+    if(v.length) badVals.push(note(f, v.join(' · ')));
+  }
+  add(!badType.length, 'serious', `type 与目录不符：${badType.length}`, '类型速查表规定了每种 type 放在哪个目录', badType);
+  add(!badKeys.length, 'warn', `字段缺失或多余：${badKeys.length}`, '按 type 核对应有的 frontmatter 字段', badKeys);
+  add(!badVals.length, 'warn', `取值越界：${badVals.length}`, 'status · goal · situation · emotiontype · field · 日期格式', badVals);
+
+  // 6 Archive 非 done
+  const notDone = M.archived.filter(f => f.fm.status !== 'done');
+  add(!notDone.length, 'warn', `Archive 里 status ≠ done：${notDone.length} / ${M.archived.length}`, '', notDone.map(L));
+
+  // 7 情绪记录文件名是日期
+  const dateNamed = M.moods.filter(f => /^\d{4}-\d{2}-\d{2}$/.test(f.base));
+  add(!dateNamed.length, 'warn', `情绪记录文件名是纯日期：${dateNamed.length}`, '规则：文件名由内容提炼', dateNamed.map(L));
+
+  // 8 未登记的目录 / 根级文件
+  const tops = new Set([...M.dirs.filter(d => !d.includes('/')), ...M.files.filter(f => f.top).map(f => f.top)]);
+  const unknownDirs = [...tops].filter(d => !KNOWN_TOP.includes(d));
+  const rootStray = M.files.filter(f => !f.top && !META_FILES.includes(f.path) && !ROOT_FILES.includes(f.path));
+  add(!unknownDirs.length && !rootStray.length, 'warn', `CLAUDE.md 目录表之外的位置：${unknownDirs.length + rootStray.length}`,
+    '规则文件没登记 → AI 不知道怎么写入', [...unknownDirs.map(d => `📁 ${esc(d)}/`), ...rootStray.map(L)]);
+
+  // 9 空文件夹
+  if(!M.noDirInfo){
+    const empty = M.dirs.filter(d => !EMPTY_OK.includes(d) && !M.files.some(f => f.path.startsWith(d + '/')));
+    add(!empty.length, 'warn', `空文件夹：${empty.length}`, '', empty.map(d => `📁 ${esc(d)}/`));
+  }
+
+  // 10 重名（README / CHANGELOG 按设计同名，排除）
+  const names = {}; M.files.forEach(f => { const k = f.base.toLowerCase(); (names[k] = names[k] || []).push(f); });
+  const dup = Object.values(names).filter(g => g.length > 1 && !/^(readme|changelog-v\d+|接力文档.*|工作日志.*)$/i.test(g[0].base));
+  add(!dup.length, 'warn', `重名文件：${dup.length} 组`, '短 wikilink 会指错（README/CHANGELOG 按设计同名，已排除）', dup.map(g => g.map(L).join(' ↔ ')));
+
+  return C;
+}
+function healthHTML(M, t){
+  const C = healthChecks(M);
+  const rank = c => c.ok ? 9 : {crit:0, serious:1, warn:2}[c.level] ?? 3;
+  C.sort((a, b) => rank(a) - rank(b));
+  const passed = C.filter(c => c.ok).length;
+  const typeCount = {};
+  M.files.forEach(f => { const k = f.type || (META_FILES.includes(f.path) ? '（元文件）' : '（无 type）'); typeCount[k] = (typeCount[k] || 0) + 1; });
+  const types = Object.entries(typeCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({label:k, value:v, tip:`<b>${esc(k)}</b><br>${v} 篇`}));
+  const checks = C.map(c => {
+    const badge = c.ok ? `<span class="st good">通过</span>` : c.level === 'serious' ? `<span class="st serious">需处理</span>` : `<span class="st warn">留意</span>`;
+    const has = !c.ok && c.items.length;
+    return `<details class="check${has ? ' has' : ''}"><summary>${badge}<span class="desc">${c.title}${c.sub ? `<small>${c.sub}</small>` : ''}</span><span class="chev">${has ? '›' : ''}</span></summary>
+      ${has ? `<ul>${c.items.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}</details>`;
+  }).join('');
+  return `<section><div class="sec-head"><h2>🩺 库体检</h2><span class="muted small">${passed} / ${C.length} 项通过 · 纯机械检查，规则来自 CLAUDE.md</span></div>
+    <div class="grid-2">
+      <div class="card">${checks}</div>
+      <div class="card"><h3>按 type 的文件数<span class="hint">${M.files.length} 篇 Markdown</span></h3>${hbars(types, '112px')}
+        ${tableView(['type', '篇数'], types.map(x => [x.label, x.value]))}</div>
+    </div></section>`;
+}
+
+/* ================= 连接界面 ================= */
+function renderConnect(opts){
+  $('#sub').textContent = subline(today());
+  const fsOK = 'showDirectoryPicker' in window;
+  $('#main').innerHTML = `<div class="connect card" style="padding:28px 30px">
+    <h1>连接你的数据库</h1>
+    <p>选一次 Obsidian 库的根文件夹（放着 <code>CLAUDE.md</code> 的那一层），之后打开本页会自动读取。</p>
+    <ul>
+      <li>只读：页面在本机浏览器里解析 Markdown，不上传、不改文件</li>
+      <li>每次打开或切回本页都会重新读取，永远是当下的状态</li>
+    </ul>
+    <div class="row">
+      ${opts.reauth ? `<button class="btn primary" id="btn-reauth">继续读取「${esc(opts.reauth)}」</button><button class="btn" id="btn-pick">换一个文件夹</button>`
+        : fsOK ? `<button class="btn primary" id="btn-pick">选择数据库文件夹</button>` : ''}
+      ${fsOK ? '' : `<label class="btn primary" style="cursor:pointer">选择数据库文件夹<input id="dir-input" type="file" webkitdirectory multiple hidden></label>
+        <span class="muted small">当前浏览器不支持记住文件夹，每次需要重选；用 Edge / Chrome 打开体验更好。</span>`}
+    </div></div>`;
+  $('#btn-pick')?.addEventListener('click', pickFolder);
+  $('#btn-reauth')?.addEventListener('click', async () => {
+    try{
+      if(await state.source.handle.requestPermission({mode:'read'}) === 'granted') refresh();
+    }catch(e){ showError(e); }
+  });
+  $('#dir-input')?.addEventListener('change', async e => {
+    try{ state.source = {kind:'files', raw:await readFileList(e.target.files)}; refresh(); }catch(err){ showError(err); }
+  });
+}
+async function pickFolder(){
+  try{
+    const h = await window.showDirectoryPicker({id:'vault-root', mode:'read'});
+    try{ await kvSet('root', h); }catch(e){}
+    state.source = {kind:'handle', handle:h};
+    refresh();
+  }catch(e){ if(e.name !== 'AbortError') showError(e); }
+}
+
+/* ================= IndexedDB（记住文件夹句柄） ================= */
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open('vault-cockpit', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function kvGet(k){ const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+async function kvSet(k, v){ const db = await idb(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); }
+
+/* ================= 刷新 / 状态 ================= */
+function setStatus(s){ $('#status').textContent = s; }
+function showError(e){
+  console.error(e);
+  $('#banner').innerHTML = `<div class="banner">出错了：${esc(e && (e.message || e))}</div>`;
+}
+async function refresh(){
+  if(state.loading || !state.source) return;
+  state.loading = true; document.body.classList.add('busy'); setStatus('读取中…');
+  try{
+    let raw;
+    if(state.source.kind === 'dev') raw = window.__DEV_DATA__;
+    else if(state.source.kind === 'handle') raw = await readHandle(state.source.handle);
+    else raw = state.source.raw;
+    state.vaultName = raw.name;
+    $('#title').textContent = document.title = raw.name ? `${raw.name} · 驾驶舱` : '驾驶舱';
+    state.model = buildModel(raw);
+    state.lastLoad = Date.now();
+    $('#banner').innerHTML = '';
+    render();
+    const n = new Date();
+    setStatus(`${state.model.files.length} 篇 · ${p2(n.getHours())}:${p2(n.getMinutes())} 读取${state.source.kind === 'files' ? ' · 刷新需重选文件夹' : ''}`);
+  }catch(e){
+    setStatus('读取失败'); showError(e);
+    if(state.source.kind === 'handle') renderConnect({reauth:state.source.handle.name});
+  }finally{
+    state.loading = false; document.body.classList.remove('busy');
+  }
+}
+
+/* ================= 主题 ================= */
+const THEMES = ['auto', 'dark', 'light'];
+const THEME_LABEL = {auto:'◐ 自动', dark:'☾ 深色', light:'☀ 浅色'};
+function applyTheme(){
+  const pref = THEMES.includes(localStorage.getItem('cockpit.theme')) ? localStorage.getItem('cockpit.theme') : 'auto';
+  const dark = pref === 'dark' || (pref === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  $('#btn-theme').textContent = THEME_LABEL[pref];
+}
+
+/* ================= tooltip ================= */
+const tip = $('#tip');
+function showTip(el){
+  const html = el.getAttribute('data-tip'); if(!html) return;
+  tip.innerHTML = html; tip.classList.add('on');
+  const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 8;
+  x = Math.max(8, Math.min(x, innerWidth - tw - 8));
+  if(y < 8) y = r.bottom + 8;
+  tip.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+}
+function hideTip(){ tip.classList.remove('on'); }
+document.addEventListener('mouseover', e => { const el = e.target.closest('[data-tip]'); el ? showTip(el) : hideTip(); });
+document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); el ? showTip(el) : hideTip(); });
+document.addEventListener('focusout', hideTip);
+addEventListener('scroll', hideTip, {passive:true});
+
+/* ================= 事件 ================= */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-range]');
+  if(b){ state.range = +b.dataset.range; localStorage.setItem('cockpit.range', state.range); render(); }
+});
+$('#btn-refresh').addEventListener('click', () => state.source ? refresh() : null);
+$('#btn-theme').addEventListener('click', () => {
+  const cur = THEMES.includes(localStorage.getItem('cockpit.theme')) ? localStorage.getItem('cockpit.theme') : 'auto';
+  localStorage.setItem('cockpit.theme', THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length]);
+  applyTheme();
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState !== 'visible') return;
+  if(state.source && state.source.kind === 'handle' && Date.now() - state.lastLoad > 30000) refresh();
+  else if(state.model) render();   // 跨过午夜时让"今天"跟上
+});
+addEventListener('error', e => showError(e.error || e.message));
+addEventListener('unhandledrejection', e => showError(e.reason));
+
+/* ================= 启动 ================= */
+(async function boot(){
+  applyTheme();
+  if(window.__DEV_DATA__){ state.source = {kind:'dev'}; return refresh(); }
+  if('showDirectoryPicker' in window){
+    let h = null;
+    try{ h = await kvGet('root'); }catch(e){}
+    if(h){
+      state.source = {kind:'handle', handle:h};
+      try{ if(await h.queryPermission({mode:'read'}) === 'granted') return refresh(); }catch(e){}
+      return renderConnect({reauth:h.name});
+    }
+  }
+  renderConnect({});
+})();
+</script>
+</body>
+</html>
