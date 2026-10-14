@@ -4,7 +4,9 @@
 
 **English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault; AI agents keep it organized by following one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) that any agent can read. Two things set it apart: every lesson the AI distills is graded by how many first-hand experiences support or contradict it, and every sentence about you is marked as either your own words or the AI's inference. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
-![驾驶舱：示例库](docs/images/cockpit-demo.png)
+![展示页](docs/images/showcase.png)
+
+三个特点各配一个例子的展示页：[docs/showcase.html](docs/showcase.html)（下载后用浏览器打开）。
 
 ## 解决什么问题
 
@@ -49,6 +51,9 @@
 
 1. 下载本仓库。
 2. 用 Edge 或 Chrome 打开 `cockpit-web/index.html`，选 `demo-vault/` 文件夹，就能看到示例库的看板。
+
+   ![驾驶舱：示例库](docs/images/cockpit-demo.png)
+
 3. 用 Obsidian 打开 `demo-vault/`，翻翻 `C-Playbook/C-Strategies/` 里四条不同等级的经验，和根目录的 `C-侧写.md`。
 4. 让你的 AI（Claude Code、Codex，或 Obsidian 里的 AI 插件）在 `demo-vault/` 里工作，说「整理收件箱」或「我最近在忙什么」，看它怎么按规则做。
 
