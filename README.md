@@ -2,7 +2,7 @@
 
 > 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
-**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and is checked against what happened when you tried it. And you just talk: several agents split the upkeep (filing, a daily brief, a monthly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
+**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: several agents split the upkeep (filing, a daily brief, a monthly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
 ![展示页](docs/images/showcase.png)
 
@@ -27,7 +27,7 @@
 难受了、卡住了、想通了，随手记一条：发生了什么，当时怎么想，事后一句感悟。AI 把记录归进你定的几个情境；同一种模式出现几次，就提炼成一条策略：识别信号、机制、破解步骤，加上证据和反例的链接。
 
 - 识别信号直接引用你当时的原话，每条结论都能点回原记录。
-- 之后照着做了，有用算支持，更糟算反例；反例不少于支持时，策略转为存疑，不删，等你决定。
+- 之后照着做了，有用没用都记回来；没用的次数不少于有用时，策略转为存疑，不删，等你决定。
 - 书和 AI 给的建议只记作来源，不算数。
 - AI 对你的推测，比如「为什么会这样」，单独标「（AI 判断）」，可以推翻。
 
