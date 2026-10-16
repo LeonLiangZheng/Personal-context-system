@@ -300,7 +300,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     <ul class="claims">
       <li><a href="#context">
         <span class="k">换哪个 AI 都能读懂你<small>一页侧写 + 一份规则</small></span>
-        <span class="ex">C-侧写.md · 画像 更新 2026-10-01 · 近况 更新 2026-10-14</span>
+        <span class="ex">C-WhoRU.md · 画像 更新 2026-10-01 · 近况 更新 2026-10-14</span>
         <span class="go">看例子 ↓</span>
       </a></li>
       <li><a href="#playbook">
@@ -323,7 +323,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     <div class="claim">
       <p class="eyebrow">特点一 · 上下文归你</p>
       <h2><span class="nb">换一个 AI，</span><span class="nb">读一页就能接上</span></h2>
-      <p>AI 产品自带的记忆属于平台，看不到，也带不走。这里的上下文全是你库里的 Markdown 文件：规则写在 <strong>CLAUDE.md</strong>（AGENTS.md 是同一份），关于你的要点汇总在一页 <strong>C-侧写.md</strong>。</p>
+      <p>AI 产品自带的记忆属于平台，看不到，也带不走。这里的上下文全是你库里的 Markdown 文件：规则写在 <strong>CLAUDE.md</strong>（AGENTS.md 是同一份），关于你的要点汇总在一页 <strong>C-WhoRU.md</strong>。</p>
       <p>Claude、Codex 或 Obsidian 里的 AI 插件，打开库先读这两份，就知道你是谁、在忙什么、要注意什么，再按标签只调这次需要的几篇原记录。</p>
       <div class="why"><b>来历：接力文档</b>作者最早的做法，是每和 AI 干完一段活，就让它写一份交接文档：做到哪了、排除过什么、踩过什么坑、我习惯怎么做。下一个 AI 读完接着干，不管是在网页、编辑器还是桌面端。后来这些交接文档合成了一份规则和一页侧写。</div>
       <div class="why"><b>侧写是索引，不是证据</b>每条都带出处。别的文件要引用事实，得回到原记录，不能引用侧写。</div>
@@ -332,16 +332,16 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     <div class="example">
       <ol class="steps" aria-label="AI 打开库的顺序">
         <li><b>CLAUDE.md</b><span>规则：库怎么分层，什么能改，什么不能碰</span></li>
-        <li><b>C-侧写.md</b><span>画像和近况，一页读完</span></li>
+        <li><b>C-WhoRU.md</b><span>画像和近况，一页读完</span></li>
         <li><b>按标签调原记录</b><span>只读这次需要的几篇</span></li>
       </ol>
 
       <div class="file">
-        <div class="path">demo-vault/C-侧写.md</div>
+        <div class="path">demo-vault/C-WhoRU.md</div>
         <div class="body">
           <div class="fm">type: profile · created: 2026-08-01 · updated: 2026-10-14</div>
           <div class="part">
-            <div class="part-h"><h3>画像</h3><span class="stamp">更新 2026-10-01</span><span class="who">每月 1 日巡检时整份重写</span></div>
+            <div class="part-h"><h3>画像</h3><span class="stamp">更新 2026-10-01</span><span class="who">每月第一次巡检时整份重写</span></div>
             <ul class="lines">
               <li>交通工程研二，毕业论文做短时交通流预测，导师周老师<span class="src">[[毕业论文]]</span></li>
               <li>大而模糊的任务容易拖，拖的时候会整理文件夹、刷手机<span class="src">[[对着空白的文献综述坐了一下午]] 2026-07-08</span></li>
@@ -468,7 +468,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       <ol class="beat" aria-label="谁在什么时候做什么">
         <li><span class="when">随时</span><div class="what"><b>日常入库</b><span>你说的话归到该去的地方，原话不改；拿不准的出选择题。</span></div></li>
         <li><span class="when">每天 08:00</span><div class="what"><b>晨报</b><span>读库给你当天的提醒，然后重写侧写里的「近况」。</span></div></li>
-        <li><span class="when">每月 1 日</span><div class="what"><b>巡检</b><span>把上个月的新记录归进手册，重算策略的证据，重写「画像」，记一条日志。</span><span class="log">示例库 10 月 1 日：处理 11 个新文件，3 条策略补了证据，1 条转为存疑，画像新增 3 条，生成三季度回忆录。</span></div></li>
+        <li><span class="when">每周</span><div class="what"><b>巡检</b><span>把上周的新记录归进手册，重算策略的证据，记一条日志；每月第一次还重写「画像」。</span><span class="log">示例库 10 月 1 日：处理 11 个新文件，3 条策略补了证据，1 条转为存疑，画像新增 3 条，生成三季度回忆录。</span></div></li>
         <li><span class="when">你提的时候</span><div class="what"><b>规则</b><span>只有一个 Agent 能改规则文件，改完同步副本、通知其他 Agent。</span></div></li>
       </ol>
       <p class="beat-foot">多个 Agent 同时运行、定时触发，是平台提供的。这个项目设计的是：谁管哪一摊，什么时候做什么，每个文件归谁写。</p>
@@ -500,7 +500,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       <div class="layer">
         <div class="lt"><b>C</b><span>蒸馏</span></div>
         <p>AI 从 B 层提炼出的情境、策略、知识综述、季度回忆录和侧写。每句都指回 B 层的出处。</p>
-        <div class="dirs">C-Playbook/ · C-Knowledge/ · C-Memoirs/ · C-侧写.md</div>
+        <div class="dirs">C-Playbook/ · C-Knowledge/ · C-Memoirs/ · C-WhoRU.md</div>
         <p class="test">删了可以按规则重跑</p>
       </div>
     </div>
@@ -512,8 +512,9 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
           <li>一份所有 AI 都遵守的规则：CLAUDE.md，AGENTS.md 是原样副本</li>
           <li>三层结构和字段取值表</li>
           <li>从记录到情境再到策略的提炼流程，策略带证据和反例</li>
-          <li>多个 Agent 各管一摊：日常入库、规则与巡检、每日晨报、移动改名</li>
-          <li>看板：一个网页文件，直接读库，按规则做 11 项体检</li>
+          <li>入库和巡检的步骤写成两个 skill，换一个 Agent 也照同样的步骤做</li>
+          <li>多个 Agent 各管一摊：日常入库、规则与巡检、每日晨报、专项任务</li>
+          <li>看板：一个网页文件，打开就是示例库的演示，也能直接读你自己的库</li>
         </ul>
       </div>
       <div>
@@ -537,10 +538,10 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     </div>
     <div>
       <ol>
-        <li>下载仓库，用 Obsidian 打开 <code>demo-vault/</code>。从 <code>C-Playbook/C-Strategies/</code> 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 <code>C-侧写.md</code>。</li>
+        <li>下载仓库，用 Obsidian 打开 <code>demo-vault/</code>。从 <code>C-Playbook/C-Strategies/</code> 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 <code>C-WhoRU.md</code>。</li>
         <li>让你的 AI 在 <code>demo-vault/</code> 里工作，说“整理收件箱”，和上面特点三的例子对照；或者问“我最近在忙什么”。</li>
-        <li>用 Edge 或 Chrome 打开 <code>cockpit-web/index.html</code>，选 <code>demo-vault/</code> 文件夹，看看看板和体检结果。</li>
-        <li>想用在自己的库上，把 <code>rules/CLAUDE.md</code> 和 <code>AGENTS.md</code> 复制到库根目录，改掉里面的取值表。</li>
+        <li>用 Edge 或 Chrome 打开 <code>cockpit-web/index.html</code>，不用选文件夹，打开就是示例库的看板。</li>
+        <li>想用在自己的库上，把 <code>rules/</code> 里的 CLAUDE.md、AGENTS.md 和 <code>.claude/</code> 文件夹复制到库根目录，改掉里面的取值表。</li>
       </ol>
       <div class="fine">
         <span>示例库里的人物和事情全部是虚构的，作者自己的库不公开。</span>

@@ -2,7 +2,7 @@
 
 > 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
-**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: several agents split the upkeep (filing, a daily brief, a monthly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
+**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: several agents split the upkeep (filing, a daily brief, a weekly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
 ![展示页](docs/images/showcase.png)
 
@@ -18,7 +18,7 @@
 
 ### 一、上下文归你：换哪个 AI 都能读懂你
 
-上下文全是你库里的 Markdown 文件。规则写在 `CLAUDE.md`（`AGENTS.md` 是同一份，Claude、Codex 等都读）；关于你的要点汇总在一页 `C-侧写.md`：画像每月重写，近况每天重写，每条带出处。任何 AI 打开库，先读这两份，再按标签只调需要的几篇原记录。
+上下文全是你库里的 Markdown 文件。规则写在 `CLAUDE.md`（`AGENTS.md` 是同一份，Claude、Codex 等都读）；关于你的要点汇总在一页 `C-WhoRU.md`：画像每月重写，近况每天重写，每条带出处。任何 AI 打开库，先读这两份，再按标签只调需要的几篇原记录。
 
 这个做法来自作者早期的「接力文档」：每和 AI 干完一段活，就让它写一份交接文档，写清做到哪了、排除过什么、踩过什么坑、我习惯怎么做，下一个 AI 读完接着干。后来这些交接文档合成了一份规则和一页侧写。
 
@@ -33,7 +33,7 @@
 
 ### 三、你只管说：整理交给 AI Agent
 
-想到什么就说一句，或往 `0-Inbox/` 丢一行字。放到哪、怎么写，由 AI 按规则判断，做完再报告；真拿不准的，写成选择题放进 `0-Unclear/` 等你勾。作者的用法是几个 Agent 分工：日常入库随时归位；每天 08:00 的晨报给当天的提醒，并重写侧写的近况；每月 1 日的巡检把新记录归进策略、重写画像；规则只有一个 Agent 能改。你只做三件事：说话、勾选择题、定规则。
+想到什么就说一句，或往 `0-Inbox/` 丢一行字。放到哪、怎么写，由 AI 按规则判断，做完再报告；真拿不准的，写成选择题放进 `0-Unclear/` 等你勾。作者的用法是几个 Agent 分工：日常入库随时归位；每天 08:00 的晨报给当天的提醒，并重写侧写的近况；每周的巡检把新记录归进策略、重算等级，每月第一次巡检还会重写画像；规则只有一个 Agent 能改。你只做三件事：说话、勾选择题、定规则。
 
 多个 Agent 同时运行、定时触发是平台提供的；这个项目设计的是规则和分工，见 [人和 AI 怎么分工](docs/人和AI怎么分工.md)。
 
@@ -42,14 +42,15 @@
 | | 做法 | 对应规则 |
 |---|---|---|
 | 一份规则 | 规则写在库根目录的 `CLAUDE.md`，`AGENTS.md` 是原样副本，任何 AI 读同一份 | 第二节 |
+| 规则和步骤分开 | `CLAUDE.md` 只写有什么、放在哪、长什么样、什么不许做；入库和巡检怎么一步步做，写成 `.claude/skills/` 里的两个 skill，能自动加载 skill 的 AI 工具会自己读 | 第三节 |
 | 三层结构 | **A 执行**（项目、旅行，有状态、会结束）· **B 记录**（情绪、想法、对话、学习，原话一字不改）· **C 蒸馏**（AI 从记录里提炼的情境、策略、综述、回忆录和侧写，随时可重跑） | 第二节、铁律 1 |
-| 用户侧写 | `C-侧写.md`：画像每月重写，近况每天重写，每条带出处；只当索引，引用事实回原记录 | 6.11 |
+| 用户侧写 | `C-WhoRU.md`：画像每月重写，近况每天重写，每条带出处；只当索引，引用事实回原记录 | 6.11 |
 | 提炼策略 | 只在你要求或巡检时做；每条策略必须带证据和反例的链接 | 3.3 |
 | 证据次数 | 策略开头三行：等级（⚪ 待验证 / 🟡 部分验证 / 🟢 已验证 / 🔴 存疑）和次数，再分别列出问题「出现」和你「照着做」的记录链接；只数你亲身经历的事，只有照着做并且有效才抬高等级 | 6.10 |
 | 原话和推测分开 | 原话放「」并链回原记录；AI 对你的推测在句末标「（AI 判断）」 | 4.1 |
-| 入库 | AI 自己判断放哪，原话不改；拿不准的放 `0-Unclear/`，写成选择题 | 3.1、铁律 3 |
-| 巡检 | 每月 1 日处理新记录、重算证据、重写画像，在项目日志里留一条记录 | 第八节 |
-| 看板 | 单个 HTML，浏览器直接读库，只列事实，并按规则做 11 项体检 | [cockpit-web](cockpit-web/README.md) |
+| 入库 | AI 自己判断放哪，原话不改，不先问「要不要存」；拿不准的放 `0-Unclear/`，写成选择题 | 入库 skill、铁律 3 |
+| 巡检 | 每周一次：把新记录归进策略、重算等级；每月第一次重写画像，每季第一次写回忆录；在项目日志里留一条记录 | 巡检 skill |
+| 看板 | 单个 HTML，打开就是示例库的演示，选了自己的库就读自己的；最上面是「记录 → 情境 → 策略」的证据链图，只列事实，11 项体检折叠在底部 | [cockpit-web](cockpit-web/README.md) |
 
 一条策略长这样（来自虚构的示例库，`demo-vault/C-Playbook/C-Strategies/把论文拆到 25 分钟能开工的大小.md`，有删节）：
 
@@ -81,20 +82,20 @@
 ## 五分钟试一下
 
 1. 下载本仓库。
-2. 用 Edge 或 Chrome 打开 `cockpit-web/index.html`，选 `demo-vault/` 文件夹，就能看到示例库的看板。
+2. 用 Edge 或 Chrome 打开 `cockpit-web/index.html`，不用选文件夹，打开就是示例库的看板。最上面是证据链图：点一条策略，看它是被哪几条记录证明的。
 
    ![驾驶舱：示例库](docs/images/cockpit-demo.png)
 
-3. 用 Obsidian 打开 `demo-vault/`，从 `C-Playbook/C-Strategies/` 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 `C-侧写.md`。
+3. 用 Obsidian 打开 `demo-vault/`，从 `C-Playbook/C-Strategies/` 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 `C-WhoRU.md`。
 4. 让你的 AI（Claude Code、Codex，或 Obsidian 里的 AI 插件）在 `demo-vault/` 里工作，说「整理收件箱」（收件箱里留了三句话，可以和展示页特点三的例子对照），或问「我最近在忙什么」，看它怎么按规则做。
 
 ## 用在自己的库上
 
-1. 把 `rules/CLAUDE.md` 和 `rules/AGENTS.md` 复制到你的 Obsidian 库根目录。
+1. 把 `rules/` 里的 `CLAUDE.md`、`AGENTS.md` 和 `.claude/` 文件夹（入库、巡检两个 skill）复制到你的 Obsidian 库根目录。
 2. 按第二节建文件夹（或直接复制 `demo-vault/` 的空文件夹结构）。
 3. 改第零节的对话原则和第七节的取值表（goal、情境、领域），换成你自己的。
 4. 以后想存什么就跟 AI 说，或丢进 `0-Inbox/` 说「整理收件箱」；想了解自己就问它，它会先读侧写，再按标签只调需要的几篇。
-5. 想要每日晨报、每月巡检，就在你用的 AI 平台上设定时任务，让它按第八节和 6.11 做。
+5. 想要每日晨报、每周巡检，就在你用的 AI 平台上设定时任务：巡检让它按巡检 skill 做，晨报让它按 6.11 重写侧写的「近况」。
 
 ## 作者自己的库
 
@@ -107,7 +108,7 @@
 
 ## 还没做的
 
-- 把「整理收件箱」「每日晨报」「月度巡检」写成可以直接装的通用流程。
+- 把「每日晨报」也写成 skill（入库和巡检已经是）。
 - 一个不依赖浏览器的规则校验脚本。
 - 英文版规则。
 
