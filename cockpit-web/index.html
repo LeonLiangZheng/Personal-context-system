@@ -504,27 +504,42 @@ function loadRules(raw){
   return {found:!!f, missing};
 }
 
-/* 策略开头的等级行（CLAUDE.md 6.10）：> 🟡 部分验证 · 验证 3 次（支持 2 / 反例 1）· 更新 2026-10-14
-   只照抄 AI 写的等级，另外核对次数与等级对不对得上；多步策略有一步没现场时封顶在「部分验证」，等级行末尾注明「缺第 N 步」 */
+/* 策略开头的等级区（CLAUDE.md 6.10），三行：
+   > 🟡 部分验证 · 出现 3 次 · 执行 2 次（有效 1 / 无效 0 / 未记录 1）· 更新 2026-10-16
+   > 出现：[[记录A]]（日期）· …
+   > 执行：[[记录B]]（日期，有效）· …
+   只照抄 AI 写的等级，另外核对次数、链接数和等级对不对得上；多步策略有一步没执行时封顶在「部分验证」，第一行末尾注明「缺第 N 步」 */
 function parseGrade(f){
   const head = f.body.split(/^##\s/m)[0];
   const m = /^[ \t]*>.*?(存疑|待验证|部分验证|已验证).*$/m.exec(head);
   const old = /(部分转正|转正|发育中)/.exec(f.body);
-  if(!m || !/验证\s*\d+\s*次/.test(m[0])) return {level:null, legacy:old ? old[1] : ''};
+  if(!m || !/出现\s*\d+\s*次/.test(m[0]))
+    return {level:null, legacy: m && /验证\s*\d+\s*次/.test(m[0]) ? '验证 N 次（支持 / 反例）' : old ? old[1] : ''};
   const line = m[0], level = m[1];
   const num = re => { const x = re.exec(line); return x ? +x[1] : null; };
-  const n = num(/验证\s*(\d+)\s*次/), sup = num(/支持\s*(\d+)/), con = num(/反例\s*(\d+)/);
+  const ap = num(/出现\s*(\d+)\s*次/), ex = num(/执行\s*(\d+)\s*次/);
+  const ok = num(/有效\s*(\d+)/), bad = num(/无效\s*(\d+)/), un = num(/未记录\s*(\d+)/);
   const up = parseDate((/更新\s*(\d{4}-\d{2}-\d{2})/.exec(line) || [])[1]);
   const gap = (/缺第[^·]*?步/.exec(line) || [''])[0];
+  const links = label => {
+    const x = new RegExp('^[ \\t]*>\\s*' + label + '[：:](.*)$', 'm').exec(head);
+    if(!x) return null;
+    return x[1].trim() === '无' ? 0 : (x[1].match(/\[\[/g) || []).length;
+  };
+  const la = links('出现'), le = links('执行');
   const issues = [];
-  if(sup == null || con == null) issues.push('没写支持 / 反例次数');
+  if(ex == null || ok == null || bad == null || un == null) issues.push('没写执行次数或有效 / 无效 / 未记录');
   else {
-    if(n !== sup + con) issues.push(`验证 ${n} 次 ≠ 支持 ${sup} + 反例 ${con}`);
-    const exp = con >= 1 && con >= sup ? '存疑' : sup === 0 ? '待验证' : sup <= 2 ? '部分验证' : '已验证';
+    if(ex !== ok + bad + un) issues.push(`执行 ${ex} 次 ≠ 有效 ${ok} + 无效 ${bad} + 未记录 ${un}`);
+    const exp = bad >= 1 && bad >= ok ? '存疑' : ok === 0 ? '待验证' : ok <= 2 ? '部分验证' : '已验证';
     if(exp !== level && !(level === '部分验证' && exp === '已验证' && gap))
-      issues.push(level === '部分验证' && exp === '已验证' ? '按次数应为「已验证」；若是多步封顶，等级行要注明缺第几步' : `按次数应为「${exp}」`);
+      issues.push(level === '部分验证' && exp === '已验证' ? '按次数应为「已验证」；若是多步封顶，第一行要注明缺第几步' : `按次数应为「${exp}」`);
   }
-  return {level, n, sup, con, up, gap, issues};
+  if(la == null) issues.push('缺「出现：」那一行');
+  else if(ap != null && la !== ap) issues.push(`出现写 ${ap} 次，链接 ${la} 个`);
+  if(le == null) issues.push('缺「执行：」那一行');
+  else if(ex != null && le !== ex) issues.push(`执行写 ${ex} 次，链接 ${le} 个`);
+  return {level, n:ap, ap, ex, ok, bad, un, up, gap, issues};
 }
 
 /* ================= 模型 ================= */
@@ -888,35 +903,35 @@ function monthlyHTML(data){
 /* ================= 库体检（按 CLAUDE.md 的机械检查） ================= */
 /* ================= 策略证据与用户侧写 ================= */
 function distillHTML(M, t){
-  return `<section><div class="sec-head"><h2>🧭 策略证据与用户侧写</h2><span class="muted small">等级和侧写由 AI 写在文件里，这里只照抄日期与次数</span></div>
+  return `<section><div class="sec-head"><h2>🧭 策略证据与用户侧写</h2><span class="muted small">等级和侧写由 AI 写在文件里，这里只照抄日期与次数，并核对次数和链接数</span></div>
     <div class="grid-2">${gradesHTML(M, t)}${profileHTML(M, t)}</div></section>`;
 }
 function gradesHTML(M, t){
   const S = M.strategies;
   const rank = s => s.grade.level ? LEVELS.findIndex(l => l.name === s.grade.level) : 9;
-  const sorted = [...S].sort((a, b) => rank(a) - rank(b) || (b.grade.n || 0) - (a.grade.n || 0) || a.base.localeCompare(b.base, 'zh'));
+  const sorted = [...S].sort((a, b) => rank(a) - rank(b) || (b.grade.ok || 0) - (a.grade.ok || 0) || (b.grade.n || 0) - (a.grade.n || 0) || a.base.localeCompare(b.base, 'zh'));
   const graded = sorted.filter(s => s.grade.level), bare = sorted.filter(s => !s.grade.level);
   const cnt = name => S.filter(s => s.grade.level === name).length;
   const sum = LEVELS.map(l => `<span class="st ${l.cls}">${l.name} ${cnt(l.name)}</span>`).join('')
     + (bare.length ? `<span class="st idle">未标注 ${bare.length}</span>` : '');
   const row = s => {
     const g = s.grade, L = LEVELS.find(l => l.name === g.level);
-    const sub = [g.sup != null ? `支持 ${g.sup} / 反例 ${g.con ?? '?'}` : '', g.up ? `更新 ${ymd(g.up)}` : '没写更新日期', esc(g.gap)]
+    const sub = [g.ex != null ? `执行 ${g.ex}：有效 ${g.ok ?? '?'} / 无效 ${g.bad ?? '?'} / 未记录 ${g.un ?? '?'}` : '', g.up ? `更新 ${ymd(g.up)}` : '没写更新日期', esc(g.gap)]
       .concat(g.issues.map(x => `<span class="bad">⚠ ${esc(x)}</span>`)).filter(Boolean).join(' · ');
-    return `<div class="gr-row"><span class="gr-name">${fileLink(s)}</span><span class="st ${L.cls}">${g.level} · 验证 ${g.n ?? '?'} 次</span><div class="gr-sub">${sub}</div></div>`;
+    return `<div class="gr-row"><span class="gr-name">${fileLink(s)}</span><span class="st ${L.cls}">${g.level} · 出现 ${g.ap ?? '?'} · 执行 ${g.ex ?? '?'}</span><div class="gr-sub">${sub}</div></div>`;
   };
   const bareRow = s => `<div class="gr-row"><span class="gr-name">${fileLink(s)}</span><span class="st idle">未标注</span>${
     s.grade.legacy ? `<div class="gr-sub">旧写法「${esc(s.grade.legacy)}」</div>` : ''}</div>`;
   const nIssue = graded.filter(s => s.grade.issues.length).length;
-  let html = `<div class="card"><h3>策略证据等级<span class="hint">${S.length} 条策略${nIssue ? ` · ${nIssue} 条次数对不上` : ''}</span></h3>`;
+  let html = `<div class="card"><h3>策略证据等级<span class="hint">${S.length} 条策略${nIssue ? ` · ${nIssue} 条次数或链接对不上` : ''}</span></h3>`;
   if(!S.length) return html + `<p class="empty">还没有策略。</p></div>`;
   html += `<div class="gr-sum">${sum}</div>` + graded.map(row).join('');
   if(bare.length) html += graded.length
     ? `<details class="more"><summary>${bare.length} 条还没有等级行 ›</summary>${bare.map(bareRow).join('')}</details>`
     : `<p class="empty">${bare.length} 条策略都还没标证据等级。</p>
        <details class="more"><summary>展开 ${bare.length} 条 ›</summary>${bare.map(bareRow).join('')}</details>`;
-  return html + tableView(['策略', '等级', '验证', '支持', '反例', '更新'],
-    sorted.map(s => [s.base, s.grade.level || '未标注', s.grade.n ?? '', s.grade.sup ?? '', s.grade.con ?? '', s.grade.up ? ymd(s.grade.up) : ''])) + `</div>`;
+  return html + tableView(['策略', '等级', '出现', '执行', '有效', '无效', '未记录', '更新'],
+    sorted.map(s => [s.base, s.grade.level || '未标注', s.grade.ap ?? '', s.grade.ex ?? '', s.grade.ok ?? '', s.grade.bad ?? '', s.grade.un ?? '', s.grade.up ? ymd(s.grade.up) : ''])) + `</div>`;
 }
 function profileHTML(M, t){
   const P = M.profile;
