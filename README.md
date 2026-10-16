@@ -39,6 +39,13 @@
 
 ## 怎么做的
 
+整体结构：你说的话先由 AI 判断放哪，归进 A 执行或 B 记录；AI 每周巡检时，再从记录里提炼出 C 层的策略、知识体系、回忆录和侧写。这张图是作者库里结构框图的简化版，源文件是 [docs/images/structure.html](docs/images/structure.html)。
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/structure-dark.png">
+  <img alt="结构图：你说一句话，AI 判断放哪，归进 A 执行（项目、旅行、归档）或 B 记录（情绪、想法、和 AI 的讨论、学习、作品、资料、饮食），拿不准的写成选择题；B 层的记录在每周巡检时提炼成 C 层的情境、应对策略、知识体系，A、B 两层合成季度回忆录，侧写 C-WhoRU 是任何 AI 打开库先读的一页。底部是管着全库的规则文件、两个 skill、定时任务和看板。" src="docs/images/structure-light.png">
+</picture>
+
 | | 做法 | 对应规则 |
 |---|---|---|
 | 一份规则 | 规则写在库根目录的 `CLAUDE.md`，`AGENTS.md` 是原样副本，任何 AI 读同一份 | 第二节 |
