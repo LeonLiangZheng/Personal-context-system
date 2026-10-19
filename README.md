@@ -2,6 +2,8 @@
 
 > 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
+**第一次用？** 看 [上手指南](上手指南.md)：下载、用 AI 打开文件夹、贴一句话、回答六个问题，就建好了自己的库。
+
 **English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: several agents split the upkeep (filing, a daily brief, a weekly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
 ![展示页](docs/images/showcase.png)
@@ -98,11 +100,7 @@
 
 ## 用在自己的库上
 
-1. 把 `rules/` 里的 `CLAUDE.md`、`AGENTS.md` 和 `.claude/` 文件夹（入库、巡检两个 skill）复制到你的 Obsidian 库根目录。
-2. 按第二节建文件夹（或直接复制 `demo-vault/` 的空文件夹结构）。
-3. 改第零节的对话原则和第七节的取值表（goal、情境、领域），换成你自己的。
-4. 以后想存什么就跟 AI 说，或丢进 `0-Inbox/` 说「整理收件箱」；想了解自己就问它，它会先读侧写，再按标签只调需要的几篇。
-5. 想要每日晨报、每周巡检，就在你用的 AI 平台上设定时任务：巡检让它按巡检 skill 做，晨报让它按 6.11 重写侧写的「近况」。
+按 [上手指南](上手指南.md) 来：用 AI 打开下载的文件夹，贴一句话，它会读 [setup/给AI的建库步骤.md](setup/给AI的建库步骤.md)，问你六个问题，再把文件夹改造成你自己的库。指南里也有第一周怎么用、常见问题，以及给熟悉的人的手动安装步骤。
 
 ## 作者自己的库
 
