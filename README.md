@@ -2,7 +2,7 @@
 
 > 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
-**第一次用？** 看 [上手指南](上手指南.md)：下载、用 AI 打开文件夹、贴一句话、回答六个问题，就建好了自己的库。
+**第一次用？** 看 [上手指南](上手指南.md)。下载下来，让 AI 打开，回答它六个问题，十分钟就有了你自己的库。
 
 **English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown in your own Obsidian vault, and one rules file (`CLAUDE.md`, mirrored as `AGENTS.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: several agents split the upkeep (filing, a daily brief, a weekly review) and only ask you multiple-choice questions when they are unsure. This repo contains the rules template, a fictional sample vault, and a zero-install dashboard. Docs are in Chinese.
 
