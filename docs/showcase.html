@@ -337,7 +337,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       </ol>
 
       <div class="file">
-        <div class="path">demo-vault/C-WhoRU.md</div>
+        <div class="path">林舟的库 / C-WhoRU.md</div>
         <div class="body">
           <div class="fm">type: profile · created: 2026-08-01 · updated: 2026-10-14</div>
           <div class="part">
@@ -416,7 +416,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
 
     <div class="example">
       <div class="file">
-        <div class="path">demo-vault/0-Inbox/随手记-1014.md · 按规则整理</div>
+        <div class="path">林舟的库 / 0-Inbox/随手记-1014.md · 按规则整理</div>
         <div class="body">
           <ol class="routes" aria-label="收件箱里的三句话分别去了哪">
             <li>
@@ -452,7 +452,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       </div>
 
       <div class="file">
-        <div class="path">demo-vault/0-Unclear/慢一点也没关系指什么.md</div>
+        <div class="path">林舟的库 / 0-Unclear/慢一点也没关系指什么.md</div>
         <div class="body">
           <div class="said">慢一点其实也没关系。</div>
           <p class="guess">只有一句话，没说指什么。同一天有一次二区慢跑 6 公里，最可能说的是配速。</p>
@@ -538,13 +538,11 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
     </div>
     <div>
       <ol>
-        <li>下载仓库，用 Obsidian 打开 <code>demo-vault/</code>。从 <code>C-Playbook/C-Strategies/</code> 里挑一条策略，顺着链接点回它引用的几条记录；再看根目录的 <code>C-WhoRU.md</code>。</li>
-        <li>让你的 AI 在 <code>demo-vault/</code> 里工作，说“整理收件箱”，和上面特点三的例子对照；或者问“我最近在忙什么”。</li>
-        <li>用 Edge 或 Chrome 打开 <code>cockpit-web/index.html</code>，不用选文件夹，打开就是示例库的看板。</li>
-        <li>想用在自己的库上，把 <code>rules/</code> 里的 CLAUDE.md、AGENTS.md 和 <code>.claude/</code> 文件夹复制到库根目录，改掉里面的取值表。</li>
+        <li>下载仓库，用 Edge 或 Chrome 打开 <code>看板.html</code>，不用选文件夹，打开就是林舟的示例库。点一条策略，看它是被哪几条记录证明的。</li>
+        <li>想建自己的库：用 AI Agent 打开下载的文件夹，说“帮我建库”，回答它几个问题。</li>
       </ol>
       <div class="fine">
-        <span>示例库里的人物和事情全部是虚构的，作者自己的库不公开。</span>
+        <span>示例里的人物和事情全部是虚构的，作者自己的库不公开。</span>
         <span>数据归你，不等于数据不出本机：用云端 AI 读库时，内容会经过 AI 服务商的服务器。哪些内容让 AI 读，由你决定。</span>
       </div>
     </div>
@@ -652,7 +650,7 @@ footer .wrap{border-top:1px solid var(--rule);padding-top:16px;display:flex;flex
       : '<div class="row"><b>为什么</b><span>'+esc(s.mechNote)+'</span></div>';
 
     panel.innerHTML =
-        '<div class="path">demo-vault/C-Playbook/C-Strategies/'+esc(s.t)+'.md 和它引用的记录</div>'
+        '<div class="path">林舟的库 / C-Playbook/C-Strategies/'+esc(s.t)+'.md 和它引用的记录</div>'
       + '<div class="chain">'
       +   '<div class="stage"><p class="stage-h"><span class="n">1</span>林舟的记录 · '+s.recs.length+' 条</p><ul class="recs">'+recs+'</ul></div>'
       +   '<div class="down">归进情境</div>'
