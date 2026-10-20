@@ -2,7 +2,9 @@
 
 > 数据归你，换哪个 AI 都能读懂你；经历过的事，长成你自己的应对手册；你只管说，整理交给 AI Agent。
 
-**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown files in a folder on your own computer, and one rules file (`CLAUDE.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: agents do the filing, a daily update and a weekly review, and only ask you multiple-choice questions when they are unsure. Download the repo, open the folder with an AI agent, say "帮我建库" (set up my vault), and the folder becomes your own vault. It also ships a zero-install dashboard with fictional sample data. Docs are in Chinese.
+**在线看**：[展示页](https://leonliangzheng.github.io/Personal-context-system/docs/showcase.html) · [Cockpit 演示](https://leonliangzheng.github.io/Personal-context-system/Cockpit.html)（不用下载，浏览器直接打开）
+
+**English** · A personal assistant system built on a context that belongs to the user. Your notes are plain Markdown files in a folder on your own computer, and one rules file (`CLAUDE.md`) tells any AI agent how to read and maintain them. Three things set it apart. The context is yours: a new agent catches up by reading one rules file and a one-page profile. Your own records grow into a personal playbook: records are grouped into situations, recurring patterns become strategies, and every strategy quotes your words and can be traced back to the specific events behind it. And you just talk: agents do the filing, a daily update and a weekly review, and only ask you multiple-choice questions when they are unsure. Download the repo, open the folder with an AI agent, say "帮我建库" (set up my vault), and the folder becomes your own vault. It also ships Cockpit, a zero-install dashboard with fictional sample data. Docs are in Chinese.
 
 ## 写在前面
 
@@ -35,7 +37,7 @@
 几个容易卡住的地方：
 
 - **下载**：在这个页面上方点绿色的「Code」按钮，选「Download ZIP」，下载后解压。
-- **打开对的文件夹**：打开后应该能看到 `CLAUDE.md`、`看板.html` 这几项。如果只看到一个文件夹（通常叫 `personal-context-system-main`），说明解压多套了一层，打开里面那个。
+- **打开对的文件夹**：打开后应该能看到 `CLAUDE.md`、`Cockpit.html` 这几项。如果只看到一个文件夹（通常叫 `personal-context-system-main`），说明解压多套了一层，打开里面那个。
 - **用 Claude Code**：新建对话时选这个文件夹。中间可能弹窗问允不允许改文件，点允许就行。
 - **问题不想答**：写「默认」，以后都能改。
 - **建完以后**：关掉这个对话，重新开一个。新对话里它才会从头读一遍规则。
@@ -60,9 +62,9 @@
 
 **每周跟它说一次「巡检」。** 它会把这一周你说过的事过一遍。同一种情况出现了好几次，比如每次遇到大任务都拖着开不了头，它会把你当时的原话、后来怎么解决的串起来，问你要不要整理成一条你自己的应对办法。下次再遇到，你问它「上次这种情况我是怎么办的」，它能直接告诉你，还能指出是哪几天的哪几件事。
 
-**想看看库里都有什么**：用 Edge 或 Chrome 打开库里的「看板.html」，点右上角「打开我的库」，选这个文件夹。你在忙的事、快到期的待办、整理出来的应对办法，都在这一页上。它只看，不改你的文件。偶尔有黄色提示，比如某件事两周没动静，只是提醒，不是库坏了。
+**想看看库里都有什么**：用 Edge 或 Chrome 打开库里的「Cockpit.html」，点右上角「打开我的库」，选这个文件夹。你在忙的事、快到期的待办、整理出来的应对办法，都在这一页上。它只看，不改你的文件。偶尔有黄色提示，比如某件事两周没动静，只是提醒，不是库坏了。
 
-![看板：打开就是示例库](docs/images/cockpit-demo.png)
+![Cockpit：打开就是示例库](docs/images/cockpit-demo.png)
 
 想用 Obsidian 翻：打开 Obsidian，选「打开本地文件夹作为库」，再选这个文件夹。
 
@@ -107,10 +109,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/structure-dark.png">
-  <img alt="结构图：你说一句话，AI 判断放哪，归进 A 执行（项目、旅行、归档）或 B 记录（情绪、想法、和 AI 的讨论、学习、作品、资料、饮食），拿不准的写成选择题；B 层的记录在每周巡检时提炼成 C 层的情境、应对策略、知识体系，A、B 两层合成季度回忆录，侧写 C-WhoRU 是任何 AI 打开库先读的一页。底部是管着全库的规则文件、两个 skill、定时任务和看板。" src="docs/images/structure-light.png">
+  <img alt="结构图：你说一句话，AI 判断放哪，归进 A 执行（项目、旅行、归档）或 B 记录（情绪、想法、和 AI 的讨论、学习、作品、资料、饮食），拿不准的写成选择题；B 层的记录在每周巡检时提炼成 C 层的情境、应对策略、知识体系，A、B 两层合成季度回忆录，侧写 C-WhoRU 是任何 AI 打开库先读的一页。底部是管着全库的规则文件、两个 skill、定时任务和 Cockpit。" src="docs/images/structure-light.png">
 </picture>
 
-一条策略长这样（来自虚构人物林舟的示例，有删节）：
+一条策略长这样（来自虚构人物郑学习的示例，有删节）：
 
 ```markdown
 > 🟡 部分验证 · 出现 1 次 · 执行 2 次（有效 2 / 无效 0 / 未记录 0）· 更新 2026-10-16
@@ -137,9 +139,9 @@
 
 7 月 8 日那次只是问题出现了，不抬高等级；另外两次照着做都有效，所以是 🟡，再有效一次才到 🟢。书里的说法只记作来源。
 
-**不建库，先看看**：用 Edge 或 Chrome 打开 `看板.html`，不用选文件夹，打开就是林舟的示例库。最上面是证据链图：点一条策略，看它是被哪几条记录证明的。三个特点各配一个例子的展示页是 [docs/showcase.html](docs/showcase.html)（下载后用浏览器打开）。
+**不建库，先看看**：打开 [Cockpit 在线演示](https://leonliangzheng.github.io/Personal-context-system/Cockpit.html)，或下载后用 Edge 或 Chrome 打开 `Cockpit.html`，不用选文件夹，打开就是郑学习的示例库。最上面是证据链图：点一条策略，看它是被哪几条记录证明的。三个特点各配一个例子的展示页，也能[在线打开](https://leonliangzheng.github.io/Personal-context-system/docs/showcase.html)。
 
-想深究的：[设计原则](docs/设计原则.md)（每条规则为什么这么定，末尾有规则速览）· [版本演进](docs/版本演进.md) · [看板说明](docs/看板说明.md)。
+想深究的：[设计原则](docs/设计原则.md)（每条规则为什么这么定，末尾有规则速览）· [版本演进](docs/版本演进.md) · [Cockpit 说明](docs/Cockpit说明.md)。
 
 ## 作者自己的库
 
@@ -147,7 +149,7 @@
 
 ## 隐私
 
-- 看板和展示页里的林舟是虚构的。我的真实库不在这个仓库里。
+- Cockpit 和展示页里的郑学习是虚构的。我的真实库不在这个仓库里。
 - **数据归你不等于数据不出本机**：文件存在你自己电脑上、格式归你；但用云端 AI 读库时，内容会经过 AI 服务商的服务器。敏感内容要不要让 AI 读，你自己决定。
 
 ## 还没做的
